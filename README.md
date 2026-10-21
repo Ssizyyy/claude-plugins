@@ -6,13 +6,15 @@ A personal [Claude Code](https://claude.com/claude-code) plugin marketplace.
 
 A frontend design workflow for **existing** apps. The main skill, `design-pass`, runs these in order on the screens you name:
 
-1. `design-taste-frontend` for layout and states (keeping your palette and fonts),
+1. `design-taste-frontend` for layout and states (keeping your palette and fonts), picking ready-made components from `ui-component-catalog` before hand-building,
 2. `break-ui` to stress the screen with worst-case data,
 3. `impeccable` polish, then audit,
 4. optional animated control motion (it asks first; see below),
 5. before/after proof.
 
 The order came from blind A/B trials on one desktop app (Tauri + React + shadcn), judged by one person. It is a strong default, not a law.
+
+`ui-component-catalog` is a catalog of 530+ shadcn-registry components from useLayouts, ui-layouts and beUI, plus css-loaders notes: what each is good for, which were used, adopted or rejected and why, and how to install or recreate them. `design-pass` uses it, and it also triggers on its own before any UI work. To record a new decision, edit its `catalog/curated.json` in this repo, run `node scripts/refresh.mjs` from the skill folder, and release a new version.
 
 Also included, invoke-by-name only (they never trigger on their own): Emil Kowalski's motion skills (`animate`, `emil-design-eng`, `animation-performance`, `animation-vocabulary`, `improve-animations`, `find-animation-opportunities`, `review-animations`), `pick-ui-library`, and Anthropic's `frontend-design` (the better pick for login, onboarding and landing pages).
 
@@ -67,4 +69,4 @@ The best-performing control-motion option in the trials was [Animate UI](https:/
 
 ### Licenses
 
-The original work here (the `design-pass` skill, the manifests and this documentation) is MIT. Bundled third-party skills keep their own licenses, listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) and in each skill folder.
+The original work here (the `design-pass` and `ui-component-catalog` skills, the manifests and this documentation) is MIT. Bundled third-party skills keep their own licenses, listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) and in each skill folder.

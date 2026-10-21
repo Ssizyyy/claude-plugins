@@ -10,7 +10,7 @@ Redesign the screens named in the args (or the conversation) by running skills f
 ## 0. Lock, prepare, ask
 
 - **Lock the brand.** Find the project's tokens and fonts (theme CSS, tokens.json, Tailwind theme). Use only existing variables: no new colours, no hardcoded hex, no new fonts. If the repo has no tokens yet, stop and ask whether to create them first.
-- **Lock dependencies.** No installs unless the user says yes to control motion below. A library that would clearly help goes in your report, not in package.json.
+- **Lock dependencies.** No new npm packages unless the user says yes to control motion below. A library that would clearly help goes in your report, not in package.json. A catalog component added with `npx shadcn add` is fine when it brings no new npm packages; otherwise recreate it or report it.
 - **Lock behaviour.** Keep the same data calls, props and copy keys. New keys are fine.
 - **Make it render in a browser with fake data.** If screens only load data inside a native shell (Tauri, Electron) or behind auth, add a fixture fallback first. Outside the shell, the data layer returns fixed demo data shaped like the real backend's, with URL params for the empty, many, error and logged-out states. Commit that separately; every later step depends on it.
 - **Record the before.** Screenshot each target screen and state, in light and dark.
@@ -19,6 +19,8 @@ Redesign the screens named in the args (or the conversation) by running skills f
 ## 1. Layout and states: `design-taste-frontend`
 
 Use the app-screen run (`references/app-screens.md`) with `--keep palette,type` and low variance. Take composition, hierarchy and states (loading, empty, error, many) from it, never colours or fonts. Point its inspector at the dev server URL. Don't fetch imagery for app screens.
+
+Before hand-building a control or pattern (tabs, menus, drawers, inline edit, filters, list rows, inputs), check `design-stack:ui-component-catalog` for a used or adopted component and take it over building your own. Map it to the project's tokens and follow the dependency lock. List the catalog keys you used or rejected, with reasons, in the report.
 
 ## 2. Stress: `break-ui`
 
@@ -48,7 +50,7 @@ Typecheck and build. Screenshot the same screens and states as the before, in li
 
 ## Brand pages
 
-On a login page, `design-stack:frontend-design` beat this whole stack. It suits screens that are read once and should feel like the product's front door: login, onboarding, landing, and the first-run empty state. For these pages, invoke `design-stack:frontend-design` instead of step 1. Keep steps 2 to 5. Don't stack it with taste on the same screen, because their rules conflict.
+On a login page, `design-stack:frontend-design` beat this whole stack. It suits screens that are read once and should feel like the product's front door: login, onboarding, landing, and the first-run empty state. For these pages, invoke `design-stack:frontend-design` instead of step 1. Keep steps 2 to 5. Don't stack it with taste on the same screen, because their rules conflict. Check `design-stack:ui-component-catalog` for sections (hero, features, stats, FAQ, footer) and effects before building them: blocks are starting points, so re-skin them to the tokens and rewrite the copy.
 
 ## Evidence
 

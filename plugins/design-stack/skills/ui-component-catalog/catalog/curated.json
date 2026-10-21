@@ -1,0 +1,785 @@
+{
+  "_readme": "Hand-written evaluations merged into components.json by scripts/refresh.mjs. 'families' keys are '<source>/<family>' and apply to every item in that family; 'items' keys are '<source>/<key>' and override. Fields: status (used|adopted|candidate|rejected), surface (app|marketing|both), motion (none|decorative|guard), note. 'guard' = needs a prefers-reduced-motion guard before use. Record why in note: where it was used, or why it was rejected. No project names: this file ships publicly.",
+  "families": {
+    "ui-layouts/text-animation": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Marquee and blur-in word reveals. Pause/stop under reduced motion; keep decorative text aria-hidden. Used for: landing page: tagline marquee, scroll-text headlines; landing H1 word-by-word reveal. Split by word, never by letter (Persian shaping)."
+    },
+    "ui-layouts/spotlight-cards": {
+      "status": "used",
+      "surface": "both",
+      "motion": "decorative",
+      "note": "Cursor-follow glow. Decoration only, never the sole hover affordance. Used for: landing page: privacy points, stat cards; landing bento tiles and brand-guide value cards; static glow on slide-content cards."
+    },
+    "ui-layouts/animated-beam": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "SVG beams between nodes. Good for 'one to many' diagrams. Give the diagram role=img and a label. Used for: landing page: presenter to viewers; landing and login diagrams (CSS dashoffset, no JS)."
+    },
+    "ui-layouts/motion-number": {
+      "status": "used",
+      "surface": "both",
+      "motion": "guard",
+      "note": "Counting numbers. Render the final value when motion is reduced. Used for: landing page: stat cards; landing stats counters (@property + counter())."
+    },
+    "ui-layouts/marquee": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Horizontal and vertical marquees. Duplicate content for the loop, aria-hidden on the copy. Used for: landing page: hero chat column; landing values band; static mid-scroll band on the Instagram post."
+    },
+    "ui-layouts/image-reveal": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Used for: landing page: hero mock window."
+    },
+    "ui-layouts/bg-blocks": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "none",
+      "note": "Used for: landing page: hero grid background."
+    },
+    "ui-layouts/noise-effect": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "none",
+      "note": "Grain overlay (feTurbulence). Keep opacity low so text contrast holds. Used for: landing page: hero panel; landing hero and values band, login ground."
+    },
+    "ui-layouts/liquid-gradient": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Animated gradient buttons. Pick stops that keep white text at 4.5:1 across the whole gradient. Used for: landing page: Download CTA."
+    },
+    "ui-layouts/footers": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "decorative",
+      "note": "Used for: landing page: giant wordmark footer."
+    },
+    "ui-layouts/scroll-animation": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Scroll reveals. CSS animation-timeline: view() works without JS; fall back to visible. Used for: landing page: section fade-up."
+    },
+    "ui-layouts/timeline-animation": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard"
+    },
+    "ui-layouts/accordion": {
+      "status": "used",
+      "surface": "both",
+      "motion": "none",
+      "note": "Prefer native <details> for plain FAQs; image accordions need button semantics so they work by keyboard. Used for: landing page: room features, FAQ."
+    },
+    "ui-layouts/carousel": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Embla-based. Needs real prev/next buttons and no autoplay without a pause control."
+    },
+    "ui-layouts/swapy": {
+      "status": "rejected",
+      "surface": "app",
+      "note": "Rejected because: drag-reorder has no use case; keyboard story is weak."
+    },
+    "ui-layouts/liquid-glass": {
+      "status": "rejected",
+      "surface": "marketing",
+      "motion": "decorative",
+      "note": "Rejected because: glass effects clash with the flat dark look and hurt text contrast; glass over text hurts contrast; login card uses a solid fill with a gradient border instead."
+    },
+    "ui-layouts/clip-path": {
+      "status": "candidate",
+      "surface": "marketing"
+    },
+    "ui-layouts/hero-section": {
+      "status": "candidate",
+      "surface": "marketing",
+      "note": "Block family traits (reviewed 2026-10-02): every block needs `motion` plus a shared timeline-animation.tsx (useInView only, no reduced-motion guard: patch it once and all blocks inherit the fix). Copy, brand names, stats and images (unsplash/picsum) are placeholders to replace. Light/dark and fonts are hardcoded Tailwind classes: re-skin to project tokens.",
+      "motion": "guard"
+    },
+    "ui-layouts/feature-section": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Block family traits (reviewed 2026-10-02): every block needs `motion` plus a shared timeline-animation.tsx (useInView only, no reduced-motion guard: patch it once and all blocks inherit the fix). Copy, brand names, stats and images (unsplash/picsum) are placeholders to replace. Light/dark and fonts are hardcoded Tailwind classes: re-skin to project tokens."
+    },
+    "ui-layouts/stats-section": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Block family traits (reviewed 2026-10-02): every block needs `motion` plus a shared timeline-animation.tsx (useInView only, no reduced-motion guard: patch it once and all blocks inherit the fix). Copy, brand names, stats and images (unsplash/picsum) are placeholders to replace. Light/dark and fonts are hardcoded Tailwind classes: re-skin to project tokens."
+    },
+    "ui-layouts/faq-section": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Block family traits (reviewed 2026-10-02): every block needs `motion` plus a shared timeline-animation.tsx (useInView only, no reduced-motion guard: patch it once and all blocks inherit the fix). Copy, brand names, stats and images (unsplash/picsum) are placeholders to replace. Light/dark and fonts are hardcoded Tailwind classes: re-skin to project tokens."
+    },
+    "ui-layouts/footer-section": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Block family traits (reviewed 2026-10-02): every block needs `motion` plus a shared timeline-animation.tsx (useInView only, no reduced-motion guard: patch it once and all blocks inherit the fix). Copy, brand names, stats and images (unsplash/picsum) are placeholders to replace. Light/dark and fonts are hardcoded Tailwind classes: re-skin to project tokens."
+    },
+    "ui-layouts/pricing-section": {
+      "status": "candidate",
+      "surface": "marketing"
+    },
+    "ui-layouts/testimonials-section": {
+      "status": "candidate",
+      "surface": "marketing"
+    },
+    "ui-layouts/mousetrail": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Rejected because: heavy motion, no content to show; cursor trails distract from content and do nothing on touch."
+    }
+  },
+  "items": {
+    "ui-layouts/scroll-text-marquee": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Used for: landing page tagline band."
+    },
+    "ui-layouts/progressive-carousel": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Autoplay with progress bars. Needs a visible Pause control; step on animationend instead of timers. Used for: landing page: how it works."
+    },
+    "ui-layouts/horizontal-progressive-carousel": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Used for: landing page: how it works."
+    },
+    "ui-layouts/stacking-card": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Sticky stacked cards. Cards must be opaque. Works on mobile with a smaller offset. Used for: landing page: who it's for."
+    },
+    "ui-layouts/gradient-border": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Conic border via @property --angle. Keep a static border for reduced motion. Used for: landing page: closing download card; landing security cards and calendar tile, login card (animated @property conic); static on Telegram, Aparat, slide title frame."
+    },
+    "ui-layouts/sparkles-title": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Used for: landing page: closing card (CSS-only version)."
+    },
+    "ui-layouts/sticky-hero-section": {
+      "status": "used",
+      "surface": "marketing",
+      "motion": "none",
+      "note": "Used for: landing page: pinned step list."
+    },
+    "ui-layouts/faq-accordion": {
+      "status": "used",
+      "surface": "both",
+      "note": "Used for: landing page FAQ (native details); landing FAQ (native details)."
+    },
+    "ui-layouts/showhide-pass": {
+      "status": "used",
+      "surface": "app",
+      "note": "Used for: landing page: room password mock (show/hide eye only); password."
+    },
+    "ui-layouts/smooth-scroll": {
+      "status": "rejected",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Lenis hijacks native scrolling; breaks anchor links and assistive tech more often than it helps. Rejected because: a11y and scroll-trap risk; scroll hijacking; costs accessibility."
+    },
+    "ui-layouts/horizontal-scroll": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Rejected because: scroll-trap or readability risk; scroll hijacking; hurts RTL reading order."
+    },
+    "ui-layouts/randomized-text-effect": {
+      "status": "rejected",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Rejected because: scrambling text hurts readability."
+    },
+    "ui-layouts/mousetrail": {
+      "status": "rejected",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Rejected because: heavy motion, no content to show."
+    },
+    "uselayouts/dynamic-toolbar": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: presenter control bar (separate overlay window); bulk actions."
+    },
+    "uselayouts/set-timer": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Use the pill look only; skip the wheel picker. Used for: countdown."
+    },
+    "uselayouts/prompt-box": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: chat composer."
+    },
+    "uselayouts/stacked-list": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: recent rooms, people; recent activity."
+    },
+    "uselayouts/filter-interaction": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: Home filter chips; filter chips."
+    },
+    "uselayouts/create-menu": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: Share my screen menu; app shell New menu."
+    },
+    "uselayouts/morphing-input": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: display name, room password; search."
+    },
+    "uselayouts/save-button": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: Start sharing, Join room states; save states."
+    },
+    "uselayouts/curve-drawer": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: Invite, Room settings drawers."
+    },
+    "uselayouts/inline-edit": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: room name; folder rename."
+    },
+    "uselayouts/delete-button": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: two-step End room; two-step delete."
+    },
+    "uselayouts/expandable-gallery": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: share source picker."
+    },
+    "uselayouts/tactile-button": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: Sharp text | Smooth motion rocker."
+    },
+    "uselayouts/discrete-tabs": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: Chat | People, Screen | Window; tabs."
+    },
+    "uselayouts/vertical-tabs": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: Settings nav."
+    },
+    "uselayouts/accordionos": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: Video > Advanced (text only)."
+    },
+    "uselayouts/theme-toggle": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: theme override; app shell header."
+    },
+    "uselayouts/client-card": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: share ended summary."
+    },
+    "uselayouts/corner-video": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Assumes a DOM video element. Used for: compact viewer (open item with native render window)."
+    },
+    "uselayouts/holographic-referral-card": {
+      "status": "adopted",
+      "surface": "app",
+      "motion": "decorative",
+      "note": "Used for: Invite card; static under reduced motion."
+    },
+    "uselayouts/smooth-dropdown": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: people row menu; row menu."
+    },
+    "uselayouts/scan-document": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: first-run upload test only; upload (pattern only)."
+    },
+    "uselayouts/animated-collection": {
+      "status": "adopted",
+      "surface": "app",
+      "note": "Used for: lists; recent activity."
+    },
+    "uselayouts/paper-shred-button": {
+      "status": "rejected",
+      "surface": "app",
+      "note": "Rejected because: flourish on a destructive action."
+    },
+    "uselayouts/bottom-menu": {
+      "status": "rejected",
+      "surface": "app",
+      "note": "Rejected because: no use without a bottom nav bar."
+    },
+    "uselayouts/gooey-navbar": {
+      "status": "rejected",
+      "surface": "app",
+      "note": "Rejected because: no use without a bottom nav bar."
+    },
+    "uselayouts/discover-button": {
+      "status": "rejected",
+      "surface": "app",
+      "note": "Rejected because: no use."
+    },
+    "uselayouts/drawer-buttons": {
+      "status": "rejected",
+      "surface": "app",
+      "note": "Rejected because: curve-drawer covers drawers."
+    },
+    "uselayouts/confidential-folder": {
+      "status": "rejected",
+      "surface": "app",
+      "note": "Rejected because: failure states need one clear action."
+    },
+    "uselayouts/empty-testimonial": {
+      "status": "rejected",
+      "surface": "app",
+      "note": "Rejected because: failure states need one clear action."
+    },
+    "uselayouts/multi-step-form": {
+      "status": "rejected",
+      "surface": "app",
+      "note": "Pulls react-hook-form, zod, date-fns, sonner. Skip for single-field flows. Rejected because: one field; heavy dependencies."
+    },
+    "uselayouts/3d-book": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard"
+    },
+    "uselayouts/coverflow-drag": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Drag carousel; watch for scroll-trap and keyboard support."
+    },
+    "uselayouts/polaroid-stack": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard"
+    },
+    "uselayouts/polaroid-drag": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard"
+    },
+    "uselayouts/photo-albums": {
+      "status": "candidate",
+      "surface": "marketing"
+    },
+    "uselayouts/get-in-touch": {
+      "status": "candidate",
+      "surface": "marketing"
+    },
+    "uselayouts/editorial-deck": {
+      "status": "candidate",
+      "surface": "marketing"
+    },
+    "uselayouts/rolling-card-stack": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard"
+    },
+    "uselayouts/feature-carousel": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard"
+    },
+    "uselayouts/wheel-carousel": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard"
+    },
+    "uselayouts/liquid-index": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Heavy; only if clearly worth it."
+    },
+    "uselayouts/stacked-outline-text": {
+      "status": "candidate",
+      "surface": "marketing"
+    },
+    "uselayouts/perspective-text-scroll": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard"
+    },
+    "uselayouts/scroll-split-cards": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Rejected for an app: scroll-page layout."
+    },
+    "uselayouts/scroll-stack-deck": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Rejected for an app: scroll-page layout."
+    },
+    "uselayouts/stack-scroll-reveal": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Rejected for an app: scroll-page layout."
+    },
+    "uselayouts/infinite-grid": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Rejected for an app: no use on app screens."
+    },
+    "uselayouts/bento-card": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Rejected for an app: no use on app screens."
+    },
+    "uselayouts/magnified-bento": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Rejected for an app: no use on app screens."
+    },
+    "ui-layouts/img-ripple-effect": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Three.js or shader item; heavy. Skip unless the page is 3D by design. Rejected because: three.js/shader weight, no use case."
+    },
+    "ui-layouts/r3f-blob": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Three.js or shader item; heavy. Skip unless the page is 3D by design. Rejected because: three.js/shader weight, no use case; three.js weight for no content."
+    },
+    "ui-layouts/mesh-shadergradient": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Three.js or shader item; heavy. Skip unless the page is 3D by design. Rejected because: three.js/shader weight, no use case; shader weight, no content value."
+    },
+    "ui-layouts/mesh-gradient-background": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Three.js or shader item; heavy. Skip unless the page is 3D by design. Rejected because: three.js/shader weight, no use case."
+    },
+    "ui-layouts/mesh-gradient-background2": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Three.js or shader item; heavy. Skip unless the page is 3D by design. Rejected because: three.js/shader weight, no use case."
+    },
+    "ui-layouts/mesh-gradient-background3": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Three.js or shader item; heavy. Skip unless the page is 3D by design. Rejected because: three.js/shader weight, no use case."
+    },
+    "ui-layouts/globe": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Three.js or shader item; heavy. Skip unless the page is 3D by design. Rejected because: three.js/shader weight, no use case."
+    },
+    "ui-layouts/card-globe": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Three.js or shader item; heavy. Skip unless the page is 3D by design. Rejected because: three.js/shader weight, no use case."
+    },
+    "ui-layouts/card-globe-white": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Three.js or shader item; heavy. Skip unless the page is 3D by design. Rejected because: three.js/shader weight, no use case."
+    },
+    "ui-layouts/randomized-text-unveil": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Rejected because: scroll-trap or readability risk."
+    },
+    "ui-layouts/framerhorizontalscroll": {
+      "status": "rejected",
+      "surface": "marketing",
+      "note": "Rejected because: scroll-trap or readability risk."
+    },
+    "ui-layouts/css-image-stacking": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "CSS-only stacking cards."
+    },
+    "ui-layouts/css-card-stacking": {
+      "status": "candidate",
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "CSS-only stacking cards."
+    },
+    "ui-layouts/hero-share-app": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Good fit for a download-app hero (headline, store buttons, avatar proof strip, floating phone mock, mobile drawer menu via motion-drawer + use-media-query). Reuse the layout idea and the drawer menu; swap store badges for the product's real download buttons and never copy the invented \"Trusted by 12,000+\" claim. Layout reference only."
+    },
+    "ui-layouts/hero-ai-value-proposition": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Hero with an embedded product-UI mock (briefs window). Best pattern for showing app UI inside a hero; 310 lines, no aria, picsum images."
+    },
+    "ui-layouts/hero-social-app": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Hero with floating stat chips around a device mock; 451 lines, heaviest hero. Take the floating-chip idea only."
+    },
+    "ui-layouts/hero-financial": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Generic service/agency hero with nav and drawer; nothing a product page needs that the other heroes lack. Hardcoded colours (up to 13 hex), remote images. Rejected because: generic agency layout."
+    },
+    "ui-layouts/hero-digital-success": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Generic service/agency hero with nav and drawer; nothing a product page needs that the other heroes lack. Hardcoded colours (up to 13 hex), remote images. Rejected because: generic agency layout."
+    },
+    "ui-layouts/hero-ai-ecommerce": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Generic service/agency hero with nav and drawer; nothing a product page needs that the other heroes lack. Hardcoded colours (up to 13 hex), remote images. Rejected because: generic agency layout."
+    },
+    "ui-layouts/hero-ai-infrastructure": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Generic service/agency hero with nav and drawer; nothing a product page needs that the other heroes lack. Hardcoded colours (up to 13 hex), remote images. Rejected because: generic agency layout."
+    },
+    "ui-layouts/feature-flow": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Step carousel (uses carousel.tsx, 4 buttons, some aria). Good for how-it-works; add a pause control if it autoplays."
+    },
+    "ui-layouts/feature-bento": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "3-col bento of image cards with big headline. Needs real imagery or mocks; no aria."
+    },
+    "ui-layouts/feature-highlights": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Smallest feature block: three highlight cards and a link. Easiest to re-skin."
+    },
+    "ui-layouts/feature-hero": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Headline plus 3-col card grid of capabilities."
+    },
+    "ui-layouts/feature-velocity": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Dark 2-col with headline and capability list; fits a privacy or architecture section."
+    },
+    "ui-layouts/feature-nature": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Content-specific (nature travel, consulting, wealth management); stock imagery and finance copy. Rejected because: content-specific, stock imagery."
+    },
+    "ui-layouts/feature-service": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Content-specific (nature travel, consulting, wealth management); stock imagery and finance copy. Rejected because: content-specific, stock imagery."
+    },
+    "ui-layouts/feature-platform": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Content-specific (nature travel, consulting, wealth management); stock imagery and finance copy. Rejected because: content-specific, stock imagery."
+    },
+    "ui-layouts/stats-details": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Best fit: 3 cards, each with a big number, label and one-line description. Pair with a counting number and CSS animation-timeline."
+    },
+    "ui-layouts/stats-bold": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Large bold numbers with labels, almost no chrome."
+    },
+    "ui-layouts/stats-minimal": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Smallest stats strip (33 lines, 4 figures). Why: layout reference only; rebuilt with honest product facts."
+    },
+    "ui-layouts/stats-banner": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Stat banner over a photo (unsplash); needs a mock instead of a photo."
+    },
+    "ui-layouts/stats-bento": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "6-col bento of stats (market share, reviews); review-score style content is not applicable to a pre-launch product."
+    },
+    "ui-layouts/stats-section": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Agency facts layout (founded, remote, capital)."
+    },
+    "ui-layouts/advanced-stats": {
+      "surface": "app",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Dashboard-style revenue/subscription stats with charts; not a marketing block. Rejected because: dashboard content."
+    },
+    "ui-layouts/faq-minimilastic": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Accordion (component, accessible semantics) plus a closing \"Still have questions?\" call to action. Best default FAQ block."
+    },
+    "ui-layouts/faq-tabbed-explorer": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Tabs plus accordion; only worth it with 10+ questions grouped by topic."
+    },
+    "ui-layouts/faq-interactive-preview": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Accordion with a preview image per answer. Opens on onMouseEnter (hover only), so add focus and click handling before use."
+    },
+    "ui-layouts/faq-journey": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Numbered accordion rows."
+    },
+    "ui-layouts/faq-glass-card": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Glass card over a photo background; contrast risk. Rejected because: glass and photo background hurt contrast."
+    },
+    "ui-layouts/faq-founder": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Founder portrait and LinkedIn link beside the FAQ; not applicable. Rejected because: founder-led layout."
+    },
+    "ui-layouts/footer-detailed": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Four link columns (Product, Company, Resources, Social); the standard footer. Mark legal links as placeholders."
+    },
+    "ui-layouts/footer-simple": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Smallest footer (53 lines): wordmark, tagline, links."
+    },
+    "ui-layouts/footer-minimal": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Brand, newsletter field and links. Drop the form if the product has no newsletter."
+    },
+    "ui-layouts/footer-bold": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Big CTA headline with email and back-to-top. Pairs with a download CTA."
+    },
+    "ui-layouts/footer-bento": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "CTA plus bento of link groups and a newsletter."
+    },
+    "ui-layouts/footer-hero": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "candidate",
+      "note": "Large closing CTA footer with image; personal-portfolio tone."
+    },
+    "ui-layouts/footer-privilege": {
+      "surface": "marketing",
+      "motion": "guard",
+      "status": "rejected",
+      "note": "Luxury-brand styling, \"ALL RIGHTS RESERVED\" copy. Rejected because: tone mismatch."
+    },
+    "uselayouts/day-picker": {
+      "note": "Used for: Jalali month picker (rebuilt, not installed).",
+      "status": "adopted"
+    },
+    "ui-layouts/animated-beam-multiple-input": {
+      "note": "Used for: landing people-files diagram, mirrored RTL.",
+      "status": "used"
+    },
+    "ui-layouts/default-marquee": {
+      "note": "Used for: landing values band, scrolls toward inline-end.",
+      "status": "used"
+    },
+    "ui-layouts/spotlight-card1": {
+      "note": "Used for: landing values cards, static glow only.",
+      "status": "used"
+    },
+    "ui-layouts/motion-number-upvotes": {
+      "note": "Used for: landing stats, CSS @property counter in Persian digits.",
+      "status": "used"
+    },
+    "ui-layouts/noise-effect": {
+      "note": "Used for: landing hero, Login.",
+      "status": "used"
+    },
+    "ui-layouts/pass-strength-inline-indicator": {
+      "note": "Used for: password strength.",
+      "status": "used"
+    },
+    "uselayouts/card-folder": {
+      "note": "Rejected because: folder metaphor conflicts with file-list rows.",
+      "status": "rejected"
+    },
+    "ui-layouts/liquid-glass": {
+      "note": "Rejected because: glass over text hurts contrast on dark surfaces.",
+      "status": "rejected"
+    }
+  }
+}
