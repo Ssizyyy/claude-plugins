@@ -38,6 +38,29 @@ Restart the session, then:
 
 Every skill is namespaced, for example `/design-stack:break-ui` or `/design-stack:frontend-design`.
 
+### Share it with a team
+
+`claude plugin install ... --scope project` only records the plugin in `.claude/settings.json`. For teammates (or a fresh clone) to find the marketplace too, add it to the same file and commit it:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "ssizyyy-plugins": {
+      "source": { "source": "github", "repo": "Ssizyyy/claude-plugins" }
+    }
+  },
+  "enabledPlugins": {
+    "design-stack@ssizyyy-plugins": true
+  }
+}
+```
+
+Claude Code asks them to trust the folder first, then fetches the marketplace and plugin.
+
+### Updating
+
+Third-party marketplaces don't auto-update by default. Run `claude plugin update design-stack@ssizyyy-plugins`, or turn on auto-update for the marketplace in `/plugin`. New releases are picked up when the plugin's `version` changes.
+
 ### Animate UI is not bundled
 
 The best-performing control-motion option in the trials was [Animate UI](https://animate-ui.com), but its license (MIT + Commons Clause) forbids redistributing it in a bundle. `design-pass` asks whether you want control motion and, if you do, tells you to run `npx skills add imskyleen/animate-ui` yourself.
