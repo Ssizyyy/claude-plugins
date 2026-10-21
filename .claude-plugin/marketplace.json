@@ -1,0 +1,15 @@
+{
+  "name": "ssizyyy-plugins",
+  "description": "Personal Claude Code plugins by Ssizyyy.",
+  "owner": {
+    "name": "Ssizyyy",
+    "url": "https://github.com/Ssizyyy"
+  },
+  "plugins": [
+    {
+      "name": "design-stack",
+      "source": "./plugins/design-stack",
+      "description": "Frontend design workflow: design-pass runs taste, break-ui and impeccable in the order that won blind trials. Includes Emil Kowalski's motion skills and frontend-design as invoke-only skills."
+    }
+  ]
+}
