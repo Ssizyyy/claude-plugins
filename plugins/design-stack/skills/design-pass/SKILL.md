@@ -9,7 +9,11 @@ Redesign the screens named in the args (or the conversation) by running skills f
 
 ## 0. Lock, prepare, ask
 
-- **Lock the brand.** Find the project's tokens and fonts (theme CSS, tokens.json, Tailwind theme). Use only existing variables: no new colours, no hardcoded hex, no new fonts. If the repo has no tokens yet, stop and ask whether to create them first.
+- **Lock the brand.** Find the project's tokens and fonts (theme CSS, tokens.json, Tailwind theme). Use only existing variables: no new colours, no hardcoded hex, no new fonts. If the tokens are missing or thin (no semantic roles like surface, muted, border, danger; no dark mode; no type scale), suggest creating the design system first, below, and wait for the answer.
+- **Design system first (only if the user says yes).** Interview the user with the `grilling` skill if it is installed; otherwise run the same kind of interview inline: rounds of numbered questions, each with your recommended answer, until nothing is left open. Cover brand personality, the colour palette (brand hue, neutrals, semantic roles, light and dark), type (families and scale), spacing, radius and elevation. Seed recommendations from what the repo already has. Then:
+  1. Write the tokens in the project's existing theme format (CSS variables, Tailwind theme or tokens.json), mapped to shadcn's variable names if the project uses shadcn.
+  2. Write a short `DESIGN.md` at the repo root: personality, what each palette role is for, type and spacing scale, do and don't rules.
+  3. Render a swatch page (palette in light and dark with contrast ratios, type scale, a few controls built from the tokens) and screenshot it for the user's approval. Iterate until approved, then commit tokens and `DESIGN.md` separately. The new tokens are now the brand lock.
 - **Lock dependencies.** No new npm packages unless the user says yes to control motion below. A library that would clearly help goes in your report, not in package.json. A catalog component added with `npx shadcn add` is fine when it brings no new npm packages; otherwise recreate it or report it.
 - **Lock behaviour.** Keep the same data calls, props and copy keys. New keys are fine.
 - **Make it render in a browser with fake data.** If screens only load data inside a native shell (Tauri, Electron) or behind auth, add a fixture fallback first. Outside the shell, the data layer returns fixed demo data shaped like the real backend's, with URL params for the empty, many, error and logged-out states. Commit that separately; every later step depends on it.

@@ -6,6 +6,7 @@ A personal [Claude Code](https://claude.com/claude-code) plugin marketplace.
 
 A frontend design workflow for **existing** apps. The main skill, `design-pass`, runs these in order on the screens you name:
 
+0. if your tokens are missing or thin, an offer to build a design system first: an interview (via `grilling` if installed), then tokens, a `DESIGN.md` and a swatch page to approve,
 1. `design-taste-frontend` for layout and states (keeping your palette and fonts), picking ready-made components from `ui-component-catalog` before hand-building,
 2. `break-ui` to stress the screen with worst-case data,
 3. `impeccable` polish, then audit,
