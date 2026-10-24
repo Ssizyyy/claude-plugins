@@ -1,0 +1,132 @@
+{
+  "$comment": "Copied third-party skills. Change them only with scripts/sync-upstream.mjs. files: extra files copied from the upstream repo root (local name: upstream path). frontmatter: keys added to SKILL.md when upstream lacks them.",
+  "skills": {
+    "design-taste-frontend": {
+      "dest": "plugins/design-stack/skills/design-taste-frontend",
+      "repo": "Leonxlnx/taste-skill",
+      "path": "skills/taste-skill",
+      "commit": "9919bcb117086422295044479d4a3c776c8f6834",
+      "files": {
+        "LICENSE": "LICENSE"
+      }
+    },
+    "break-ui": {
+      "dest": "plugins/design-stack/skills/break-ui",
+      "repo": "emilkowalski/skills",
+      "path": "skills/break-ui",
+      "commit": "e8a175de22ae1e49370fc144c1f3bb9aeedf988d",
+      "files": {
+        "LICENSE": "LICENSE"
+      }
+    },
+    "pick-ui-library": {
+      "dest": "plugins/design-stack/skills/pick-ui-library",
+      "repo": "emilkowalski/skills",
+      "path": "skills/pick-ui-library",
+      "commit": "85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "files": {
+        "LICENSE": "LICENSE"
+      }
+    },
+    "review-animations": {
+      "dest": "plugins/design-stack/skills/review-animations",
+      "repo": "emilkowalski/skills",
+      "path": "skills/review-animations",
+      "commit": "85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "files": {
+        "LICENSE": "LICENSE"
+      }
+    },
+    "emil-design-eng": {
+      "dest": "plugins/design-stack/skills/emil-design-eng",
+      "repo": "emilkowalski/skills",
+      "path": "skills/emil-design-eng",
+      "commit": "85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "files": {
+        "LICENSE": "LICENSE"
+      },
+      "frontmatter": {
+        "disable-model-invocation": true
+      }
+    },
+    "animate": {
+      "dest": "plugins/design-stack/skills/animate",
+      "repo": "emilkowalski/skills",
+      "path": "skills/animate",
+      "commit": "85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "files": {
+        "LICENSE": "LICENSE"
+      },
+      "frontmatter": {
+        "disable-model-invocation": true
+      }
+    },
+    "animation-performance": {
+      "dest": "plugins/design-stack/skills/animation-performance",
+      "repo": "emilkowalski/skills",
+      "path": "skills/animation-performance",
+      "commit": "2d228630ba1446365f614a108cb8252f1feda202",
+      "files": {
+        "LICENSE": "LICENSE"
+      },
+      "frontmatter": {
+        "disable-model-invocation": true
+      }
+    },
+    "animation-vocabulary": {
+      "dest": "plugins/design-stack/skills/animation-vocabulary",
+      "repo": "emilkowalski/skills",
+      "path": "skills/animation-vocabulary",
+      "commit": "85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "files": {
+        "LICENSE": "LICENSE"
+      },
+      "frontmatter": {
+        "disable-model-invocation": true
+      }
+    },
+    "improve-animations": {
+      "dest": "plugins/design-stack/skills/improve-animations",
+      "repo": "emilkowalski/skills",
+      "path": "skills/improve-animations",
+      "commit": "85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "files": {
+        "LICENSE": "LICENSE"
+      },
+      "frontmatter": {
+        "disable-model-invocation": true
+      }
+    },
+    "find-animation-opportunities": {
+      "dest": "plugins/design-stack/skills/find-animation-opportunities",
+      "repo": "emilkowalski/skills",
+      "path": "skills/find-animation-opportunities",
+      "commit": "85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "files": {
+        "LICENSE": "LICENSE"
+      },
+      "frontmatter": {
+        "disable-model-invocation": true
+      }
+    },
+    "impeccable": {
+      "dest": "plugins/design-stack/skills/impeccable",
+      "repo": "pbakaus/impeccable",
+      "path": ".agents/skills/impeccable",
+      "commit": "0d6b47ea19b63afe15e3f93a44d5d9fbbc6fd275",
+      "files": {
+        "LICENSE": "LICENSE",
+        "NOTICE.md": "NOTICE.md"
+      }
+    },
+    "frontend-design": {
+      "dest": "plugins/design-stack/skills/frontend-design",
+      "repo": "anthropics/skills",
+      "path": "skills/frontend-design",
+      "commit": "41bbe19d1a1a7eaab5e7bb9050a417e5c6cffc8f",
+      "frontmatter": {
+        "disable-model-invocation": true
+      }
+    }
+  }
+}
