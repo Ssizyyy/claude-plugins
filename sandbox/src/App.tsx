@@ -11,6 +11,7 @@ import Analytics from "@/screens/Analytics"
 import Onboarding from "@/screens/Onboarding"
 import Pricing from "@/screens/Pricing"
 import Notifications from "@/screens/Notifications"
+import Polished from "@/polished/Polished"
 
 // Hash routing keeps the sandbox dependency-free: #/dashboard, #/orders, ...
 const screens = {
@@ -25,11 +26,12 @@ const screens = {
   onboarding: { label: "Onboarding", Component: Onboarding },
   pricing: { label: "Pricing", Component: Pricing },
   feedback: { label: "Feedback", Component: Notifications },
+  polished: { label: "Polished", Component: Polished },
 }
 type Key = keyof typeof screens
 
 const current = (): Key => {
-  const k = location.hash.replace(/^#\/?/, "").split("?")[0]
+  const k = location.hash.replace(/^#\/?/, "").split("?")[0].split("/")[0]
   return k in screens ? (k as Key) : "dashboard"
 }
 
@@ -44,7 +46,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <nav className="flex gap-1 border-b px-4 py-2 text-sm">
+      {screen !== "polished" && <nav className="flex gap-1 border-b px-4 py-2 text-sm">
         <span className="mr-4 font-semibold">Sandbox</span>
         {(Object.keys(screens) as Key[]).map((k) => (
           <a
@@ -55,7 +57,7 @@ export default function App() {
             {screens[k].label}
           </a>
         ))}
-      </nav>
+      </nav>}
       <Component />
     </div>
   )
