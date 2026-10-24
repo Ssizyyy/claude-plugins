@@ -1,6 +1,6 @@
 {
   "name": "design-stack",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Frontend design workflow, a smart designer: design-pass interviews you for new screens, then runs taste (layout and states), break-ui (stress), then impeccable (polish and audit), picking components from a bundled catalog of 750+ shadcn-registry components (incl. React Bits). Also bundles Emil Kowalski's motion skills and Anthropic's frontend-design as invoke-only skills.",
   "author": {
     "name": "Ssizyyy",
