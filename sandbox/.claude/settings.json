@@ -1,0 +1,14 @@
+{
+  "extraKnownMarketplaces": {
+    "ssizyyy-dev": {
+      "source": {
+        "source": "file",
+        "path": "F:/Dev/claude-plugins/.claude-plugin/dev-marketplace.json"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "design-stack@ssizyyy-dev": true,
+    "design-stack@ssizyyy-plugins": false
+  }
+}
