@@ -2,6 +2,11 @@
 
 Installs only pick up a release when `version` in `.claude-plugin/plugin.json` changes.
 
+## 2.2.1 (2026-10-24)
+
+- Fixed `design-pass` Brand pages: it told the model to invoke `frontend-design`, which is invoke-only, so the step was skipped. It now reads that skill's `SKILL.md` from the sibling folder instead.
+- `reactbits-tools` is callable by the model, since `design-pass` runs it as a step.
+
 ## 2.2.0 (2026-10-24)
 
 - `ui-component-catalog` adds React Bits: 218 animated components (text effects, animations, cards and menus, micro-interactions, WebGL backgrounds), TypeScript + Tailwind variant, installed with `npx shadcn add`. 84 are marked `?` as a shortlist for product UI; the rest are `unreviewed` showpiece effects. Only metadata and install commands are bundled (the license forbids redistributing the components). `refresh.mjs` now pulls four registries.

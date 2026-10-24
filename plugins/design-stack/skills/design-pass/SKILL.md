@@ -58,7 +58,7 @@ Typecheck and build. Screenshot the same screens and states as the before, in li
 
 ## Brand pages
 
-On a login page, `design-stack:frontend-design` beat this whole stack. It suits screens that are read once and should feel like the product's front door: login, onboarding, landing, and the first-run empty state. For these pages, invoke `design-stack:frontend-design` instead of step 1. Keep steps 2 to 5. Don't stack it with taste on the same screen, because their rules conflict. Check `design-stack:ui-component-catalog` for sections (hero, features, stats, FAQ, footer) and effects before building them: blocks are starting points, so re-skin them to the tokens and rewrite the copy.
+On a login page, `design-stack:frontend-design` beat this whole stack. It suits screens that are read once and should feel like the product's front door: login, onboarding, landing, and the first-run empty state. For these pages, use `frontend-design` instead of step 1. It is invoke-only, so the model cannot call it: read `../frontend-design/SKILL.md` (relative to this skill's base directory) and follow it. Keep steps 2 to 5. Don't stack it with taste on the same screen, because their rules conflict. Check `design-stack:ui-component-catalog` for sections (hero, features, stats, FAQ, footer) and effects before building them: blocks are starting points, so re-skin them to the tokens and rewrite the copy.
 
 ## Evidence
 
