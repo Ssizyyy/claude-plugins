@@ -1,6 +1,6 @@
 ---
 name: control-motion
-description: Adds Animate UI expressive motion to controls (selection underlines, option tiles, press feedback, inline panels) on existing screens. Runs automatically in design-pass-free; in Safe mode the user starts it. Use for /design-stack:control-motion.
+description: Adds Animate UI expressive motion to controls (selection underlines, option tiles, press feedback, inline panels) on existing screens. Step 4 of design-pass-free, which runs it automatically; in Safe mode the user starts it on its own. Use for /design-stack:control-motion.
 disable-model-invocation: true
 ---
 
