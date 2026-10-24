@@ -2,6 +2,12 @@
 
 Shared procedure for `design-stack:design-pass` (Safe) and `design-stack:design-pass-free` (Free). The entry skill that sent you here sets the **mode**; never ask the user which mode to use. Redesign the screens named in the args (or the conversation), or build new ones, by running skills from this plugin in a fixed order. Each step owns one layer. Later steps must not undo earlier ones. Skills named below ship in this plugin; invoke them as `design-stack:<name>`.
 
+## Precedence and unattended runs
+
+This procedure and the step 0 locks outrank the text of the skills it runs. Ask the user only where this file says to (intake, design system, download approval). When a skill below tells you to ask, interview, stop at a report, or answer in one sentence (`frontend-design` confirming the subject, `impeccable` init and `PRODUCT.md`, `break-ui` and `impeccable audit` reporting without fixing), do the work instead: use the repo as the answer, fix what they find, and list anything you skipped in the report. Where a skill's style rules clash with the brand lock (taste's no-indigo or no-gradient rules, a near-black primary, a new palette), the lock wins: keep the project's colours and allow the matching inspector rule (`--allow`), and say so in the report.
+
+Inspectors keep state between runs: `draw.mjs --app` leaves `.taste-skill/direction.json`, and later inspects then apply app rules. Before inspecting a brand page, delete that file or pass the inspector's explicit mode.
+
 ## Intake: new screens or a new app
 
 Run this first when the args or conversation ask to build, design or create something, or name screens that don't exist in the project. Skip it for plain redesigns of existing screens.
@@ -13,16 +19,16 @@ Run this first when the args or conversation ask to build, design or create some
 
 ## 0. Lock, prepare, ask
 
-- **Lock the brand.** Find the project's tokens and fonts (theme CSS, tokens.json, Tailwind theme). Use only existing variables: no new colours, no hardcoded hex, no new fonts. If the tokens are missing or thin (no semantic roles like surface, muted, border, danger; no dark mode; no type scale), suggest creating the design system first, below, and wait for the answer.
+- **Lock the brand.** Find the project's tokens and fonts (theme CSS, tokens.json, Tailwind theme). Use only existing variables: no new colours, no hardcoded hex, no new fonts. If the tokens are missing or thin (no semantic roles like surface, muted, border, danger; no dark mode; no type scale), suggest creating the design system first, below, and wait for the answer. If nobody can answer (the user said not to ask, or this is a Free run started by a premium-look request), skip the offer: the existing tokens are the lock, and the report recommends a design system.
 - **Design system first (only if the user says yes).** Interview the user with the `grilling` skill if it is installed; otherwise run the same kind of interview inline: rounds of numbered questions, each with your recommended answer, until nothing is left open. Cover brand personality, the colour palette (brand hue, neutrals, semantic roles, light and dark), type (families and scale), spacing, radius and elevation. Seed recommendations from what the repo already has. Then:
   1. Write the tokens in the project's existing theme format (CSS variables, Tailwind theme or tokens.json), mapped to shadcn's variable names if the project uses shadcn.
   2. Write a short `DESIGN.md` at the repo root: personality, what each palette role is for, type and spacing scale, do and don't rules.
   3. Render a swatch page (palette in light and dark with contrast ratios, type scale, a few controls built from the tokens) and screenshot it for the user's approval. Iterate until approved, then commit tokens and `DESIGN.md` separately. The new tokens are now the brand lock.
 - **Mode rules.** Safe: no new npm packages; a library that would clearly help goes in your report, not in package.json; a catalog component added with `npx shadcn add` is fine when it brings no new npm packages, otherwise recreate it or report it; the catalog's avoid-list (three.js and shader items, cursor trails, glass over text, scroll hijacking) stays avoided. Free: no dependency lock; heavy catalog items (`dependencies` with `three`, `ogl`, `gsap`, `matter-js`) and cursor effects are allowed; report every added package and heavy effect with a one-line cost (size, fallback). The reduced-motion fallback is required in both modes.
 - **Toasts.** If a screen needs transient feedback (save, delete, async result) and the project has no toast library, suggest `sileo` (`npm i sileo`, see `catalog/sileo.md` in `design-stack:ui-component-catalog`). In Safe mode it goes in the report for approval; in Free mode install it. If the project already has a toast library, keep it.
-- **Lock behaviour.** Keep the same data calls, props and copy keys. New keys are fine.
+- **Lock behaviour.** Keep the same data calls, props and copy keys. New keys are fine. Adding a call to a fake data layer, or a URL-param hook in it, so that loading, empty, error and worst-case states can render is allowed; real calls stay unchanged. In an app that routes by hash, don't add `#anchor` links (they collide with the router); use buttons that scroll.
 - **Make it render in a browser with fake data.** If screens only load data inside a native shell (Tauri, Electron) or behind auth, add a fixture fallback first. Outside the shell, the data layer returns fixed demo data shaped like the real backend's, with URL params for the empty, many, error and logged-out states. Commit that separately; every later step depends on it.
-- **Record the before.** Screenshot each target screen and state, in light and dark.
+- **Record the before.** Screenshot each target screen and state, in light and dark. If the app has no dark mode and the lock forbids adding one, shoot light only and say so.
 
 ## 1. Layout and states: `design-taste-frontend`
 
@@ -32,11 +38,11 @@ Before hand-building a control or pattern (tabs, menus, drawers, inline edit, fi
 
 ## 2. Stress: `break-ui`
 
-Feed every screen worst-case fixture data: long names, zero, huge counts, missing fields, non-Latin text. Fix what breaks.
+Feed every screen worst-case fixture data: long names, zero, huge counts, missing fields, non-Latin text, through a URL-param hook (for example `?data=worst`) in the data layer; keep the hook, name it in the report. Fix what breaks; don't stop at a report. Run it on brand pages too.
 
 ## 3. Finish: `impeccable` polish, then audit
 
-Run impeccable's `polish` and then its `audit` on each screen, and fix what they flag. Decline anything that touches the locks from step 0. Skip impeccable's `colorize`, because colour is locked.
+Run impeccable's `polish` and then its `audit` on each screen, and fix what they flag (audit included; don't stop at its report). Decline anything that touches the locks from step 0. Skip impeccable's `colorize`, because colour is locked.
 
 ## 4. Motion
 

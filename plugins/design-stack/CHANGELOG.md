@@ -7,6 +7,7 @@ Installs only pick up a release when `version` in `.claude-plugin/plugin.json` c
 - Mode is chosen by the skill you start, not by a question. `design-pass` is Safe (no new packages, no motion). New `design-pass-free` is Free (no dependency lock, heavy effects allowed, control motion included). It is model-invocable for premium-look requests ("I want a premium looking app") and counts such a request as the yes to Free and motion. The shared procedure moved to `design-pass/references/core.md`.
 - In Free mode the React Bits tools (`reactbits-tools`) are used without being asked, for heroes, empty states and product shots with no fitting catalog item. Downloads still need your yes.
 - New invoke-only `control-motion`: the Animate UI expressive step, runnable on its own after a Safe pass.
+- Fixes from a Free-mode trial on the sandbox: a precedence section in `core.md` (the locks outrank third-party skill text; no questions, fix instead of report), a default when nobody can answer the design-system offer, allowed fake-API and `?data=worst` hooks, light-only before shots when the app has no dark mode, a note on stale inspector state and hash-router anchors; `control-motion` now states its real cost range and what to do on screens without selection controls; `reactbits-tools` saves exports from inside the page when downloads are unavailable.
 - `design-pass` no longer reads or writes the `design-pass mode:` line in `DESIGN.md`; an existing line is ignored.
 
 ## 2.3.0 (2026-10-24)

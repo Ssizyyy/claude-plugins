@@ -31,4 +31,5 @@ Run this for each hero, empty state, first-run screen or product shot that has n
 1. Decide the tool and the exact settings from the project's tokens (palette, mood, contrast against the screen's text).
 2. If a browser tool is available (the built-in browser or Claude in Chrome), open the tool page and make the asset there. Downloading is a separate step: name the file, source and size, and get the user's yes in chat before saving it. If no browser tool is available, or the tool's UI can't be driven, fall back to steps 1 to 3 of How to use and keep going with the other screens meanwhile.
 3. Put the export in the repo (the project's assets folder), wire it in as step 3 above says, and add the tool, settings and file to the report.
-4. In Free mode a code export that adds `ogl` or `three` is allowed; report the package and size.
+4. A browser pane may not be able to save downloads to disk. After the user's yes, read the exported file inside the page (the export blob) and save it from there instead of waiting for a download, then shrink it (re-encode large images or video) before committing it.
+5. In Free mode a code export that adds `ogl` or `three` is allowed; report the package and size.

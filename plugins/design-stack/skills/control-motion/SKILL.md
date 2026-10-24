@@ -6,16 +6,18 @@ disable-model-invocation: true
 
 # Control motion
 
-Adds animated motion to the controls of the screens named in the args (or the conversation). It needs new dependencies (`@animate-ui/react`, `motion`, about 40 kB of JavaScript): if you were not started by `design-pass-free`, state that cost in one line and get a yes first.
+Adds animated motion to the controls of the screens named in the args (or the conversation). It needs new dependencies (`@animate-ui/react`, `motion`). Cost depends on how many primitives you use: about +40 to +48 kB JavaScript in the trial on two control-heavy screens, +168 kB (+54 kB gzip) on a dashboard and landing page with hover highlights, bar growth and entrances. Measure with a build and report it: if you were not started by `design-pass-free`, state that cost in one line and get a yes first.
 
 The tested choice for control motion is **Animate UI at its expressive level**. It is not bundled here because its license (MIT + Commons Clause) forbids redistributing it, so install it yourself in the project:
 
-1. `npx skills add imskyleen/animate-ui` (project scope), and add the `@animate-ui/react` and `motion` packages. This is the exception to Safe mode's no-installs lock; say so in the report.
+1. Add the `@animate-ui/react` and `motion` packages (and their peers, such as `radix-ui`, if a primitive needs them). Run `npx skills add imskyleen/animate-ui` (project scope) only when you want its codemod or rules; it downloads a third-party skill, so say so. This is the exception to Safe mode's no-installs lock; say so in the report.
 2. Tell the skill the level up front: **expressive**. Its codemod (path A) only touches `components/ui/*` and does nothing for hand-built controls; use path B (import swap) or C (rules).
 3. Pitfalls found in the trial:
    - Wrap each selection control in a `motion.div` with `layoutRoot`. Otherwise, if the page shifts after load (a skeleton replacing content), the shared-layout underline stays stranded at the old position.
    - Animated numbers must settle fast (well under 300 ms); a roughly 1 s settle on counts read at a glance felt slow.
    - Stagger rows only on the first load, never when a filter, search or sort changes what is visible.
    - Expect about +40 to +48 kB of JavaScript (about +15 to +17 kB gzip); the subtle level costs about +11 kB.
+
+Check which controls the screens actually have. Selection controls, tabs and option tiles get the underline and tile motion; if a screen has none (a dashboard, a landing page), animate only what exists: button press and hover, row hover highlights, one first-load chart or entrance, and say that the selection motion did not apply.
 
 Finish with a typecheck, build and before/after screenshots in light and dark, and report the bundle size change.
