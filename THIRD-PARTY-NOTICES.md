@@ -21,6 +21,8 @@ This repository bundles skills written by other people. Each keeps its own licen
 | ui-layouts | https://ui-layouts.com (https://github.com/ui-layouts/uilayouts) | MIT |
 | beUI | https://beui.dev | MIT |
 
+`catalog/sileo.md` is original notes about the Sileo toast (https://github.com/hiaaryan/sileo, MIT) and bundles none of its code. `reactbits-tools` links to the hosted React Bits tools and contains none of their code.
+
 `catalog/css-loaders.md` is original notes about https://css-loaders.com (Temani Afif) and contains no CSS from it.
 
 ## Not bundled: Animate UI

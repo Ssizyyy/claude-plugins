@@ -28,6 +28,13 @@ const SOURCES = {
     install: (k) => `npx shadcn@latest add https://beui.dev/r/${k}.json`,
     note: '',
   },
+  'react-bits': {
+    url: 'https://reactbits.dev/r/registry.json',
+    site: 'https://reactbits.dev',
+    // TypeScript + Tailwind variant only; the registry has 4 variants per component
+    install: (k) => `npx shadcn@latest add https://reactbits.dev/r/${k}-TS-TW`,
+    note: 'optional: "registries": {"@react-bits": "https://reactbits.dev/r/{name}.json"} in components.json, then add @react-bits/<Key>-TS-TW',
+  },
 };
 
 const human = (s) => s.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -51,8 +58,15 @@ for (const [source, cfg] of Object.entries(SOURCES)) {
     // some networks time out Node's fetch (IPv6/proxy) while curl works
     reg = JSON.parse(execFileSync('curl', ['-sL', '-m', '60', cfg.url], { maxBuffer: 64 * 1024 * 1024 }).toString());
   }
+  let rbFamily = {};
+  if (source === 'react-bits') {
+    // llms.txt maps each component to its category (url path segment)
+    const llms = execFileSync('curl', ['-sL', '-m', '60', 'https://reactbits.dev/llms.txt'], { maxBuffer: 16 * 1024 * 1024 }).toString();
+    for (const m of llms.matchAll(/\]\(https:\/\/www\.reactbits\.dev\/([a-z-]+)\/[a-z0-9-]+\)[^\n]*CLI: `(.+?)`/g)) rbFamily[m[2]] = m[1];
+    reg.items = reg.items.filter((i) => i.name.endsWith('-TS-TW')).map((i) => ({ ...i, name: i.name.slice(0, -6) }));
+  }
   for (const it of reg.items) {
-    const family = familyOf(source, it);
+    const family = source === 'react-bits' ? rbFamily[it.name] || 'misc' : familyOf(source, it);
     const id = `${source}/${it.name}`;
     const cur = { ...(curated.families?.[`${source}/${family}`] || {}), ...(curated.items?.[id] || {}) };
     out.push({

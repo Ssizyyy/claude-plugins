@@ -9,7 +9,7 @@
     {
       "name": "design-stack",
       "source": "./plugins/design-stack",
-      "description": "Frontend design workflow: design-pass runs taste, break-ui and impeccable in the order that won blind trials. Includes a catalog of 530+ shadcn-registry components that design-pass picks from. Includes Emil Kowalski's motion skills and frontend-design as invoke-only skills."
+      "description": "Frontend design workflow: design-pass runs taste, break-ui and impeccable in the order that won blind trials. Includes a catalog of 750+ shadcn-registry components that design-pass picks from. Includes Emil Kowalski's motion skills and frontend-design as invoke-only skills."
     }
   ]
 }
