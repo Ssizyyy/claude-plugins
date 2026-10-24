@@ -1,7 +1,6 @@
 ---
 name: reactbits-tools
 description: Hosted React Bits tools for making assets a component library cannot: animated backgrounds (Background Studio), product shots from screenshots (Center Stage), logo marks (Shape Magic), plus Texture Lab and Sound Lab. Use when a hero, empty state or marketing page needs a custom background, a device mockup or a logo, instead of installing another component.
-disable-model-invocation: true
 ---
 
 # React Bits tools
