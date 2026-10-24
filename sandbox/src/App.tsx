@@ -5,6 +5,12 @@ import Orders from "@/screens/Orders"
 import Settings from "@/screens/Settings"
 import Login from "@/screens/Login"
 import Landing from "@/screens/Landing"
+import Products from "@/screens/Products"
+import Customers from "@/screens/Customers"
+import Analytics from "@/screens/Analytics"
+import Onboarding from "@/screens/Onboarding"
+import Pricing from "@/screens/Pricing"
+import Notifications from "@/screens/Notifications"
 
 // Hash routing keeps the sandbox dependency-free: #/dashboard, #/orders, ...
 const screens = {
@@ -13,11 +19,17 @@ const screens = {
   settings: { label: "Settings", Component: Settings },
   login: { label: "Login", Component: Login },
   landing: { label: "Landing", Component: Landing },
+  products: { label: "Products", Component: Products },
+  customers: { label: "Customers", Component: Customers },
+  analytics: { label: "Analytics", Component: Analytics },
+  onboarding: { label: "Onboarding", Component: Onboarding },
+  pricing: { label: "Pricing", Component: Pricing },
+  feedback: { label: "Feedback", Component: Notifications },
 }
 type Key = keyof typeof screens
 
 const current = (): Key => {
-  const k = location.hash.replace(/^#\/?/, "")
+  const k = location.hash.replace(/^#\/?/, "").split("?")[0]
   return k in screens ? (k as Key) : "dashboard"
 }
 
