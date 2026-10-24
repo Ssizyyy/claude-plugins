@@ -1,11 +1,20 @@
 ---
 name: design-pass
-description: Run the full design pass on one or more app screens of an existing frontend, in the order that won blind trials — taste for layout and states, break-ui for stress, then impeccable polish and audit — with optional control motion. Use for /design-stack:design-pass, "redesign this page/screen", "give <screen> a design pass". For brand or marketing pages (login, onboarding, landing), see Brand pages first.
+description: The design-stack entry point, a smart designer. Redesigns existing app screens in the order that won blind trials (taste for layout and states, break-ui for stress, impeccable polish and audit, optional control motion), and builds new screens or whole apps after an adaptive interview. Use for /design-stack:design-pass, "redesign this page/screen", "give <screen> a design pass", "design/build me a <screen or app>". For brand or marketing pages (login, onboarding, landing), see Brand pages first.
 ---
 
 # Design pass
 
-Redesign the screens named in the args (or the conversation) by running skills from this plugin in a fixed order. Each step owns one layer. Later steps must not undo earlier ones. The skills named below ship in this plugin; invoke them as `design-stack:<name>`.
+Redesign the screens named in the args (or the conversation), or build new ones, by running skills from this plugin in a fixed order. Each step owns one layer. Later steps must not undo earlier ones. The skills named below ship in this plugin; invoke them as `design-stack:<name>`.
+
+## Intake: new screens or a new app
+
+Run this first when the args or conversation ask to build, design or create something, or name screens that don't exist in the project. Skip it for plain redesigns of existing screens.
+
+1. Look at the repo first (stack, tokens, components, existing screens, fixtures) so you never ask what you can read.
+2. Interview the user with the `grilling` skill if it is installed; otherwise run the same kind of interview inline. There is no fixed question list: ask whatever you need to build well, in rounds of numbered questions with a recommended answer each, until nothing is left open. Typical ground: what the product is and who uses it, the screens and flows with their states, the data and fake-API shape, taste and brand preferences, Safe or Free mode, control motion, design system, which pages are brand pages. Skip what the repo or earlier answers already settle.
+3. Write a plan table: screen, skills that will run on it, libraries or catalog items, states covered. Show it and wait for approval. Change the plan on feedback; build nothing before a yes. This gate applies on every build run.
+4. After approval, build each screen plainly first (structure, data via a fixture or fake API, every state), then run steps 0 to 5 below on it. Answers already given in the interview (mode, motion, design system) count as the answers to step 0's questions: don't ask twice.
 
 ## 0. Lock, prepare, ask
 
