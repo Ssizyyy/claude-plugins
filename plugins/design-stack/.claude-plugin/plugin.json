@@ -1,6 +1,6 @@
 {
   "name": "design-stack",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Frontend design workflow for existing apps: design-pass runs taste (layout and states), break-ui (stress), then impeccable (polish and audit), picking components from a bundled catalog of 530+ shadcn-registry components. Also bundles Emil Kowalski's motion skills and Anthropic's frontend-design as invoke-only skills.",
   "author": {
     "name": "Ssizyyy",

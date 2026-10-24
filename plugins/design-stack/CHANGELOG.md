@@ -2,6 +2,11 @@
 
 Installs only pick up a release when `version` in `.claude-plugin/plugin.json` changes.
 
+## 2.1.1 (2026-10-24)
+
+- Fixed `ui-component-catalog` loading with empty metadata: its description contained an unquoted `: `, which broke the YAML front matter, so the skill never triggered on its own. The description is now quoted.
+- Ships the `design-pass` step 0 design-system interview to installs that got 2.1.0 before it merged.
+
 ## 2.1.0 (2026-10-22)
 
 - Added `ui-component-catalog`: 535 shadcn-registry components from useLayouts, ui-layouts and beUI, plus css-loaders notes, with what each is good for, which were used, adopted or rejected and why, and how to install them. Regenerate with `scripts/refresh.mjs`.
