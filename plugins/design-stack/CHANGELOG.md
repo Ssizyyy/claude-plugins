@@ -2,6 +2,12 @@
 
 Installs only pick up a release when `version` in `.claude-plugin/plugin.json` changes.
 
+## 2.4.0 (2026-10-24)
+
+- Mode is chosen by the skill you start, not by a question. `design-pass` is Safe (no new packages, no motion). New invoke-only `design-pass-free` is Free (no dependency lock, heavy effects allowed, control motion included). The shared procedure moved to `design-pass/references/core.md`.
+- New invoke-only `control-motion`: the Animate UI expressive step, runnable on its own after a Safe pass.
+- `design-pass` no longer reads or writes the `design-pass mode:` line in `DESIGN.md`; an existing line is ignored.
+
 ## 2.3.0 (2026-10-24)
 
 - `design-pass` is now the single entry point. New intake step: when asked to build or design new screens or an app, it reads the repo, runs an adaptive interview (the `grilling` skill, no fixed questions), shows a plan table for approval, then builds each screen and runs the existing steps on it.
