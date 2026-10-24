@@ -2,6 +2,10 @@
 
 Installs only pick up a release when `version` in `.claude-plugin/plugin.json` changes.
 
+## 2.3.0 (2026-10-24)
+
+- `design-pass` is now the single entry point. New intake step: when asked to build or design new screens or an app, it reads the repo, runs an adaptive interview (the `grilling` skill, no fixed questions), shows a plan table for approval, then builds each screen and runs the existing steps on it.
+
 ## 2.2.1 (2026-10-24)
 
 - Fixed `design-pass` Brand pages: it told the model to invoke `frontend-design`, which is invoke-only, so the step was skipped. It now reads that skill's `SKILL.md` from the sibling folder instead.
