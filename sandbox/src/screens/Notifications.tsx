@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { save } from "@/api"
 
 type Note = { id: number; text: string; tone: "ok" | "error" | "info" }
@@ -25,12 +25,14 @@ export default function Notifications() {
         <Button variant="outline" onClick={() => push("Payment failed for ORD-1038", "error")}>Simulate failure</Button>
         <Button variant="outline" onClick={() => push("3 new orders since you looked", "info")}>Info</Button>
         <Button variant="destructive" onClick={() => setConfirm(true)}>Delete order</Button>
+        <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost">Hover me</Button>
           </TooltipTrigger>
           <TooltipContent>Tooltips explain icon-only controls</TooltipContent>
         </Tooltip>
+        </TooltipProvider>
       </div>
       <Dialog open={confirm} onOpenChange={setConfirm}>
         <DialogContent>
