@@ -28,7 +28,7 @@ Run this first when the args or conversation ask to build, design or create some
 
 Use the app-screen run (`references/app-screens.md`) with `--keep palette,type` and low variance. Take composition, hierarchy and states (loading, empty, error, many) from it, never colours or fonts. Point its inspector at the dev server URL. Don't fetch imagery for app screens.
 
-Before hand-building a control or pattern (tabs, menus, drawers, inline edit, filters, list rows, inputs), check `design-stack:ui-component-catalog` for a used or adopted component and take it over building your own. Map it to the project's tokens and follow the mode's dependency rules. For a hero, empty state or product shot, `design-stack:reactbits-tools` lists hosted tools that make backgrounds, device mockups and logo marks. List the catalog keys you used or rejected, with reasons, in the report.
+Before hand-building a control or pattern (tabs, menus, drawers, inline edit, filters, list rows, inputs), check `design-stack:ui-component-catalog` for a used or adopted component and take it over building your own. Map it to the project's tokens and follow the mode's dependency rules. For a hero, empty state or product shot, `design-stack:reactbits-tools` lists hosted tools that make backgrounds, device mockups and logo marks. In Free mode, don't wait to be asked: for every hero, empty state, first-run screen or product shot, use `design-stack:reactbits-tools` (its Free-mode flow) when no catalog item fits. List the catalog keys and tools you used or rejected, with reasons, in the report.
 
 ## 2. Stress: `break-ui`
 
