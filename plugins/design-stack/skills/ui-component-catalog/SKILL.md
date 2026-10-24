@@ -1,6 +1,6 @@
 ---
 name: ui-component-catalog
-description: Catalog of 530+ ready-made React/shadcn UI components from useLayouts, ui-layouts and beUI (beui.dev), plus css-loaders: what exists, what each is good for, what was already used, adopted or rejected and why, and how to install or recreate it. Use before designing or building any UI (landing pages, app screens, hero, features, pricing, FAQ, carousels, cards, charts, AI/chat UI, animated effects) so components are chosen from the catalog instead of hand-rolled or re-searched.
+description: 'Catalog of 530+ ready-made React/shadcn UI components from useLayouts, ui-layouts and beUI (beui.dev), plus css-loaders: what exists, what each is good for, what was already used, adopted or rejected and why, and how to install or recreate it. Use before designing or building any UI (landing pages, app screens, hero, features, pricing, FAQ, carousels, cards, charts, AI/chat UI, animated effects) so components are chosen from the catalog instead of hand-rolled or re-searched.'
 ---
 
 # UI component catalog

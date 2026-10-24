@@ -1,0 +1,15 @@
+{
+  "name": "ssizyyy-dev",
+  "description": "Dev marketplace: the plugins in this working tree, read in place. Used by sandbox/; never published.",
+  "owner": {
+    "name": "Ssizyyy",
+    "url": "https://github.com/Ssizyyy"
+  },
+  "plugins": [
+    {
+      "name": "design-stack",
+      "source": "./plugins/design-stack",
+      "description": "Working-tree copy of design-stack."
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blocks commits whose staged files contain a name from .private-names.
+# Enable once per clone: git config core.hooksPath scripts/hooks
+exec node scripts/check-private-names.mjs --staged

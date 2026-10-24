@@ -1,0 +1,19 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+/* Deliberately thin: one font, raw Tailwind palette in components, no semantic roles, no dark mode.
+   This is what makes design-stack:design-pass step 0 offer to build a design system. */
+@theme {
+  --font-sans: "Geist Variable", sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-gray-200);
+  }
+  body {
+    @apply bg-white font-sans text-gray-900;
+  }
+}

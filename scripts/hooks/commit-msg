@@ -1,0 +1,3 @@
+#!/bin/sh
+# Blocks commit messages that contain a name from .private-names.
+exec node scripts/check-private-names.mjs --file "$1"

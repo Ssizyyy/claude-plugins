@@ -1,0 +1,52 @@
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g @anthropic-ai/claude-code@2.1.310
+      - name: Validate marketplace and plugins
+        run: |
+          claude plugin validate .
+          for p in plugins/*/; do claude plugin validate "$p"; done
+      - name: Validate dev marketplace
+        # validate only recognises a file named marketplace.json; the dev one shares the repo root
+        run: |
+          cp .claude-plugin/dev-marketplace.json .claude-plugin/marketplace.json
+          claude plugin validate .
+          git checkout .claude-plugin/marketplace.json
+      - name: Both marketplaces list every plugin
+        run: |
+          node -e '
+            const fs = require("fs");
+            const names = (f) => JSON.parse(fs.readFileSync(f)).plugins.map((p) => p.name).sort().join();
+            const dirs = fs.readdirSync("plugins").sort().join();
+            for (const f of [".claude-plugin/marketplace.json", ".claude-plugin/dev-marketplace.json"])
+              if (names(f) !== dirs) { console.error(`${f} lists [${names(f)}], plugins/ has [${dirs}]`); process.exit(1); }
+          '
+
+  version-bump:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: node scripts/check-version-bump.mjs origin/${{ github.base_ref }}
+
+  private-names:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/check-private-names.mjs
+        env:
+          PRIVATE_NAMES: ${{ secrets.PRIVATE_NAMES }}
