@@ -2,6 +2,13 @@
 
 Installs only pick up a release when `version` in `.claude-plugin/plugin.json` changes.
 
+## 2.2.0 (2026-10-24)
+
+- `ui-component-catalog` adds React Bits: 218 animated components (text effects, animations, cards and menus, micro-interactions, WebGL backgrounds), TypeScript + Tailwind variant, installed with `npx shadcn add`. 84 are marked `?` as a shortlist for product UI; the rest are `unreviewed` showpiece effects. Only metadata and install commands are bundled (the license forbids redistributing the components). `refresh.mjs` now pulls four registries.
+- New `catalog/sileo.md`: notes on the Sileo toast (`npm i sileo`).
+- New invoke-only skill `reactbits-tools`: when to send the user to the hosted React Bits tools (Background Studio, Center Stage, Shape Magic; Texture Lab and Sound Lab on request).
+- `design-pass` asks once whether to run Safe (dependency lock and avoid-list on, the default) or Free (new packages, WebGL and cursor effects allowed), saves the answer in `DESIGN.md`, and always requires reduced-motion fallbacks. It suggests Sileo when a project has no toast library.
+
 ## 2.1.1 (2026-10-24)
 
 - Fixed `ui-component-catalog` loading with empty metadata: its description contained an unquoted `: `, which broke the YAML front matter, so the skill never triggered on its own. The description is now quoted.

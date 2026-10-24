@@ -141,6 +141,31 @@
       "status": "rejected",
       "surface": "marketing",
       "note": "Rejected because: heavy motion, no content to show; cursor trails distract from content and do nothing on touch."
+    },
+    "react-bits/text-animations": {
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Hero and headline text effects. Split by word for Persian/Arabic, never by letter (shaping breaks). Keep real text in the DOM for screen readers. Gimmick-grade effects (ASCII, particle, glitch, falling text, cursor trails, WebGL backdrops) look premium in a demo but cost attention, GPU and contrast in product UI; use sparingly and only where the page already earns a moment.  Install pulls the TS+Tailwind variant; map colours to project tokens."
+    },
+    "react-bits/animations": {
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Wrappers, scroll reveals, borders, cursors. Cursor effects are decoration only, never the sole affordance, and are off on touch. Gimmick-grade effects (ASCII, particle, glitch, falling text, cursor trails, WebGL backdrops) look premium in a demo but cost attention, GPU and contrast in product UI; use sparingly and only where the page already earns a moment.  Install pulls the TS+Tailwind variant; map colours to project tokens."
+    },
+    "react-bits/components": {
+      "surface": "both",
+      "motion": "guard",
+      "note": "Cards, menus, galleries, sliders. Many are image-gallery or marketing patterns; check keyboard and focus before using in product UI. Install pulls the TS+Tailwind variant; map colours to project tokens."
+    },
+    "react-bits/micro": {
+      "surface": "app",
+      "motion": "guard",
+      "note": "Small interaction components (toggles, buttons, inputs, toasts, agent/chat status). Closest to product UI; verify focus, labels and reduced-motion on each. Install pulls the TS+Tailwind variant; map colours to project tokens."
+    },
+    "react-bits/backgrounds": {
+      "surface": "marketing",
+      "motion": "guard",
+      "note": "Full-bleed WebGL/canvas backgrounds for hero or empty states. Needs a static fallback under reduced motion, contrast check against text on top, and a mobile performance check. Many pull in ogl or three. Install pulls the TS+Tailwind variant; map colours to project tokens."
     }
   },
   "items": {
@@ -780,6 +805,258 @@
     "ui-layouts/liquid-glass": {
       "note": "Rejected because: glass over text hurts contrast on dark surfaces.",
       "status": "rejected"
+    },
+    "react-bits/BlurText": {
+      "status": "candidate"
+    },
+    "react-bits/CountUp": {
+      "status": "candidate"
+    },
+    "react-bits/GradientText": {
+      "status": "candidate"
+    },
+    "react-bits/RotatingText": {
+      "status": "candidate"
+    },
+    "react-bits/ScrollReveal": {
+      "status": "candidate"
+    },
+    "react-bits/ShinyText": {
+      "status": "candidate"
+    },
+    "react-bits/SplitText": {
+      "status": "candidate"
+    },
+    "react-bits/TextType": {
+      "status": "candidate"
+    },
+    "react-bits/TrueFocus": {
+      "status": "candidate"
+    },
+    "react-bits/ScrollVelocity": {
+      "status": "candidate"
+    },
+    "react-bits/Shuffle": {
+      "status": "candidate"
+    },
+    "react-bits/AnimatedContent": {
+      "status": "candidate"
+    },
+    "react-bits/FadeContent": {
+      "status": "candidate"
+    },
+    "react-bits/ElectricBorder": {
+      "status": "candidate"
+    },
+    "react-bits/GlareHover": {
+      "status": "candidate"
+    },
+    "react-bits/GradualBlur": {
+      "status": "candidate"
+    },
+    "react-bits/LogoLoop": {
+      "status": "candidate"
+    },
+    "react-bits/Magnet": {
+      "status": "candidate"
+    },
+    "react-bits/Noise": {
+      "status": "candidate"
+    },
+    "react-bits/ScrollExpand": {
+      "status": "candidate"
+    },
+    "react-bits/StarBorder": {
+      "status": "candidate"
+    },
+    "react-bits/AnimatedList": {
+      "status": "candidate"
+    },
+    "react-bits/BorderGlow": {
+      "status": "candidate"
+    },
+    "react-bits/Carousel": {
+      "status": "candidate"
+    },
+    "react-bits/CardSwap": {
+      "status": "candidate"
+    },
+    "react-bits/Counter": {
+      "status": "candidate"
+    },
+    "react-bits/Dock": {
+      "status": "candidate"
+    },
+    "react-bits/ElasticSlider": {
+      "status": "candidate"
+    },
+    "react-bits/GlassSurface": {
+      "status": "candidate"
+    },
+    "react-bits/GooeyNav": {
+      "status": "candidate"
+    },
+    "react-bits/MagicBento": {
+      "status": "candidate"
+    },
+    "react-bits/Masonry": {
+      "status": "candidate"
+    },
+    "react-bits/PillNav": {
+      "status": "candidate"
+    },
+    "react-bits/ScrollStack": {
+      "status": "candidate"
+    },
+    "react-bits/SpotlightCard": {
+      "status": "candidate"
+    },
+    "react-bits/Stack": {
+      "status": "candidate"
+    },
+    "react-bits/Stepper": {
+      "status": "candidate"
+    },
+    "react-bits/StaggeredMenu": {
+      "status": "candidate"
+    },
+    "react-bits/TiltedCard": {
+      "status": "candidate"
+    },
+    "react-bits/FlowingMenu": {
+      "status": "candidate"
+    },
+    "react-bits/CircularGallery": {
+      "status": "candidate"
+    },
+    "react-bits/CardNav": {
+      "status": "candidate"
+    },
+    "react-bits/ProfileCard": {
+      "status": "candidate"
+    },
+    "react-bits/LineSidebar": {
+      "status": "candidate"
+    },
+    "react-bits/BellToggle": {
+      "status": "candidate"
+    },
+    "react-bits/CodeSlots": {
+      "status": "candidate"
+    },
+    "react-bits/GlideSelect": {
+      "status": "candidate"
+    },
+    "react-bits/HoldButton": {
+      "status": "candidate"
+    },
+    "react-bits/JellyRadio": {
+      "status": "candidate"
+    },
+    "react-bits/PromptBar": {
+      "status": "candidate"
+    },
+    "react-bits/RubberSegment": {
+      "status": "candidate"
+    },
+    "react-bits/ScrubField": {
+      "status": "candidate"
+    },
+    "react-bits/SlideCommit": {
+      "status": "candidate"
+    },
+    "react-bits/SpringCheck": {
+      "status": "candidate"
+    },
+    "react-bits/SquishSwitch": {
+      "status": "candidate"
+    },
+    "react-bits/StatusMark": {
+      "status": "candidate"
+    },
+    "react-bits/SwipeRow": {
+      "status": "candidate"
+    },
+    "react-bits/SwipeToast": {
+      "status": "candidate"
+    },
+    "react-bits/WarmTooltip": {
+      "status": "candidate"
+    },
+    "react-bits/PulseHeart": {
+      "status": "candidate"
+    },
+    "react-bits/ThoughtLine": {
+      "status": "candidate"
+    },
+    "react-bits/VoicePill": {
+      "status": "candidate"
+    },
+    "react-bits/WakeSlider": {
+      "status": "candidate"
+    },
+    "react-bits/PeekRating": {
+      "status": "candidate"
+    },
+    "react-bits/LatticeLoader": {
+      "status": "candidate"
+    },
+    "react-bits/CallChip": {
+      "status": "candidate"
+    },
+    "react-bits/Aurora": {
+      "status": "candidate"
+    },
+    "react-bits/DarkVeil": {
+      "status": "candidate"
+    },
+    "react-bits/DotGrid": {
+      "status": "candidate"
+    },
+    "react-bits/Dither": {
+      "status": "candidate"
+    },
+    "react-bits/GradientBlinds": {
+      "status": "candidate"
+    },
+    "react-bits/Grainient": {
+      "status": "candidate"
+    },
+    "react-bits/Iridescence": {
+      "status": "candidate"
+    },
+    "react-bits/LightRays": {
+      "status": "candidate"
+    },
+    "react-bits/LineWaves": {
+      "status": "candidate"
+    },
+    "react-bits/Silk": {
+      "status": "candidate"
+    },
+    "react-bits/SoftAurora": {
+      "status": "candidate"
+    },
+    "react-bits/Threads": {
+      "status": "candidate"
+    },
+    "react-bits/Waves": {
+      "status": "candidate"
+    },
+    "react-bits/Particles": {
+      "status": "candidate"
+    },
+    "react-bits/PixelBlast": {
+      "status": "candidate"
+    },
+    "react-bits/Plasma": {
+      "status": "candidate"
+    },
+    "react-bits/FloatingLines": {
+      "status": "candidate"
+    },
+    "react-bits/GridScan": {
+      "status": "candidate"
     }
   }
 }

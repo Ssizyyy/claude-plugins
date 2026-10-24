@@ -14,17 +14,21 @@ Redesign the screens named in the args (or the conversation) by running skills f
   1. Write the tokens in the project's existing theme format (CSS variables, Tailwind theme or tokens.json), mapped to shadcn's variable names if the project uses shadcn.
   2. Write a short `DESIGN.md` at the repo root: personality, what each palette role is for, type and spacing scale, do and don't rules.
   3. Render a swatch page (palette in light and dark with contrast ratios, type scale, a few controls built from the tokens) and screenshot it for the user's approval. Iterate until approved, then commit tokens and `DESIGN.md` separately. The new tokens are now the brand lock.
-- **Lock dependencies.** No new npm packages unless the user says yes to control motion below. A library that would clearly help goes in your report, not in package.json. A catalog component added with `npx shadcn add` is fine when it brings no new npm packages; otherwise recreate it or report it.
+- **Ask the mode first.** Read `DESIGN.md` for a line `design-pass mode: safe` or `design-pass mode: free`; if there is none, ask once: "Safe (locks on, the default) or Free (new packages, WebGL and cursor effects allowed; reduced-motion fallbacks still required)?" Save the answer to `DESIGN.md` (create it if missing, one line) and re-ask only if the user says so.
+  - **Safe**: the dependency lock below holds, and the catalog's avoid-list (three.js and shader items, cursor trails, glass over text, scroll hijacking) stays avoided.
+  - **Free**: no dependency lock, and heavy catalog items (`dependencies` with `three`, `ogl`, `gsap`, `matter-js`) and cursor effects are allowed. Control motion counts as yes. The reduced-motion fallback is still required in both modes. Report every added package and heavy effect with a one-line cost (size, fallback).
+- **Lock dependencies (Safe mode).** No new npm packages unless the user says yes to control motion below. A library that would clearly help goes in your report, not in package.json. A catalog component added with `npx shadcn add` is fine when it brings no new npm packages; otherwise recreate it or report it.
+- **Toasts.** If a screen needs transient feedback (save, delete, async result) and the project has no toast library, suggest `sileo` (`npm i sileo`, see `catalog/sileo.md` in `design-stack:ui-component-catalog`). In Safe mode it goes in the report for approval; in Free mode install it. If the project already has a toast library, keep it.
 - **Lock behaviour.** Keep the same data calls, props and copy keys. New keys are fine.
 - **Make it render in a browser with fake data.** If screens only load data inside a native shell (Tauri, Electron) or behind auth, add a fixture fallback first. Outside the shell, the data layer returns fixed demo data shaped like the real backend's, with URL params for the empty, many, error and logged-out states. Commit that separately; every later step depends on it.
 - **Record the before.** Screenshot each target screen and state, in light and dark.
-- **Ask once about control motion**, before any code: "Add animated motion to the controls (selection underlines, option tiles, press feedback, inline panels)? It needs a new dependency and adds roughly 40 kB of JavaScript." Run the Motion step only on yes.
+- **Ask once about control motion** (Safe mode only; Free mode counts it as yes), before any code: "Add animated motion to the controls (selection underlines, option tiles, press feedback, inline panels)? It needs a new dependency and adds roughly 40 kB of JavaScript." Run the Motion step only on yes.
 
 ## 1. Layout and states: `design-taste-frontend`
 
 Use the app-screen run (`references/app-screens.md`) with `--keep palette,type` and low variance. Take composition, hierarchy and states (loading, empty, error, many) from it, never colours or fonts. Point its inspector at the dev server URL. Don't fetch imagery for app screens.
 
-Before hand-building a control or pattern (tabs, menus, drawers, inline edit, filters, list rows, inputs), check `design-stack:ui-component-catalog` for a used or adopted component and take it over building your own. Map it to the project's tokens and follow the dependency lock. List the catalog keys you used or rejected, with reasons, in the report.
+Before hand-building a control or pattern (tabs, menus, drawers, inline edit, filters, list rows, inputs), check `design-stack:ui-component-catalog` for a used or adopted component and take it over building your own. Map it to the project's tokens and follow the mode's dependency rules. For a hero, empty state or product shot, `design-stack:reactbits-tools` lists hosted tools that make backgrounds, device mockups and logo marks. List the catalog keys you used or rejected, with reasons, in the report.
 
 ## 2. Stress: `break-ui`
 
