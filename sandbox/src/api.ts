@@ -2,7 +2,7 @@
 // Tune from the URL: ?latency=1500 ms (default 600), ?fail=1 always fails, ?empty=1 returns nothing.
 import { orders, products, type Order, type Product } from "@/fixtures"
 
-const param = (k: string) => new URLSearchParams(location.hash.split("?")[1]).get(k)
+export const param = (k: string) => new URLSearchParams(location.hash.split("?")[1]).get(k)
 
 async function call<T>(data: T, empty: T): Promise<T> {
   await new Promise((r) => setTimeout(r, Number(param("latency") ?? 600)))
