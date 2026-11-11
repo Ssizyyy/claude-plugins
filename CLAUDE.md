@@ -6,8 +6,9 @@ Public Claude Code marketplace `ssizyyy-plugins`. Everything committed here is p
 
 - `plugins/<name>/`: one plugin each (`.claude-plugin/plugin.json`, `skills/`, `CHANGELOG.md`).
 - `.claude-plugin/marketplace.json`: the published marketplace. `.claude-plugin/dev-marketplace.json`: `ssizyyy-dev`, the same plugins read in place from this working tree. List every new plugin in both.
-- `sandbox/`: Vite + React + shadcn app with fixture data and deliberately thin tokens, for trying skills. Never shipped.
-- `scripts/`: `check-private-names.mjs`, `sync-upstream.mjs` (pins in `upstream.json`), git hooks in `scripts/hooks/`.
+- `sandbox/`: Vite + React + shadcn app with fixture data and deliberately thin tokens, for trying skills. Never shipped. Screens tagged `slop` in `sandbox/src/App.tsx` are deliberately careless first drafts, the fixed input for skill trials: don't clean them up on main.
+- `scripts/`: `check-private-names.mjs`, `sync-upstream.mjs` (pins in `upstream.json`), git hooks in `scripts/hooks/`, `skill-trial.mjs` (below).
+- `trials/`: `LOG.md` (every trialled skill and its verdict), `SLOP.md` (the defects planted in the slop screens), one folder per trial with its `report.md`.
 
 ## Rules
 
@@ -21,6 +22,10 @@ Public Claude Code marketplace `ssizyyy-plugins`. Everything committed here is p
 
 Edit under `plugins/`, then restart the Claude session in `sandbox/` (or `/reload-plugins`); `sandbox/.claude/settings.json` enables `design-stack@ssizyyy-dev`, which loads the working tree directly. Run the app with `npm run dev` in `sandbox/`.
 The marketplace path in that file is absolute; in a clone elsewhere, re-register it from `sandbox/`: `claude plugin marketplace add <clone>/.claude-plugin/dev-marketplace.json --scope project`.
+
+## Trialling a skill from the internet
+
+`/skill-trial <owner/repo> [path]` (`.claude/skills/skill-trial/`) pins the candidate, runs `design-pass` with and without it in separate worktrees, and has the user judge the results blind. A skill joins `design-stack` only after a logged adopt.
 
 ## PR flow
 

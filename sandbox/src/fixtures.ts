@@ -104,3 +104,45 @@ export const activity = [
 ]
 
 export const user = { name: "Alex Morgan", email: "alex@example.com", company: "Acme Goods" }
+
+// Mobile and desktop app screens (src/screens/mobile, src/screens/desktop).
+export type Message = { id: string; from: string; subject: string; preview: string; time: string; folder: string; unread: boolean }
+
+const subjects = [
+  "Invoice 2291 is overdue",
+  "Re: Re: Fwd: Updated supplier price list for Q4 and the revised minimum order quantities you asked about last week",
+  "Your export is ready",
+  "Stock alert: Cast Iron Skillet",
+  "Welcome to Acme Goods",
+  "Refund request ORD-1039",
+  "Team offsite, final agenda",
+  "Password changed",
+]
+export const messages: Message[] = people.slice(0, 24).map((from, i) => ({
+  id: `M-${i + 1}`,
+  from,
+  subject: subjects[i % subjects.length],
+  preview: "Hi, following up on the note below. Could you confirm the numbers before Friday so we can close the month?",
+  time: `${String(9 + (i % 9)).padStart(2, "0")}:${String((i * 7) % 60).padStart(2, "0")}`,
+  folder: ["Inbox", "Inbox", "Inbox", "Sent", "Archive"][i % 5],
+  unread: i % 3 === 0,
+}))
+
+export type LogLine = { id: number; time: string; level: "info" | "warn" | "error" | "debug"; source: string; message: string }
+
+const logMessages = [
+  "GET /api/orders 200 in 41 ms",
+  "Cache miss for key products:list:page=3:sort=price:filter=kitchen,home,bags:currency=EUR:locale=de-DE, refetching from origin",
+  "Payment webhook retried (attempt 3 of 5)",
+  "Unhandled rejection: TypeError: Cannot read properties of undefined (reading 'total') at OrderRow (orders.tsx:48:22)",
+  "Worker 4 heartbeat ok",
+  "Slow query (1840 ms): SELECT * FROM orders WHERE status = 'pending' ORDER BY created_at DESC",
+]
+const levels: LogLine["level"][] = ["info", "debug", "warn", "error", "info", "warn"]
+export const logs: LogLine[] = Array.from({ length: 80 }, (_, i) => ({
+  id: i + 1,
+  time: `12:${String(Math.floor(i / 2) % 60).padStart(2, "0")}:${String((i * 13) % 60).padStart(2, "0")}.${String((i * 137) % 1000).padStart(3, "0")}`,
+  level: levels[i % levels.length],
+  source: ["api", "cache", "billing", "web", "worker", "db"][i % 6],
+  message: logMessages[i % logMessages.length],
+}))
