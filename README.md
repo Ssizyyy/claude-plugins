@@ -4,7 +4,7 @@ A personal [Claude Code](https://claude.com/claude-code) plugin marketplace.
 
 ## design-stack
 
-A frontend design workflow for **existing** apps. The main skill, `design-pass`, runs these in order on the screens you name:
+A frontend design workflow for apps. The main skill, `design-pass`, redesigns the screens you name. Ask it to build screens or an app that doesn't exist yet and it interviews you first (via `grilling` if installed), shows a plan table, and builds only after you approve it. Either way, it then runs these in order:
 
 0. if your tokens are missing or thin, an offer to build a design system first: an interview (via `grilling` if installed), then tokens, a `DESIGN.md` and a swatch page to approve,
 1. `design-taste-frontend` for layout and states (keeping your palette and fonts), picking ready-made components from `ui-component-catalog` before hand-building,
@@ -15,7 +15,7 @@ A frontend design workflow for **existing** apps. The main skill, `design-pass`,
 
 The order came from blind A/B trials on one desktop app (Tauri + React + shadcn), judged by one person. It is a strong default, not a law.
 
-`ui-component-catalog` is a catalog of 530+ shadcn-registry components from useLayouts, ui-layouts and beUI, plus css-loaders notes: what each is good for, which were used, adopted or rejected and why, and how to install or recreate them. `design-pass` uses it, and it also triggers on its own before any UI work. To record a new decision, edit its `catalog/curated.json` in this repo, run `node scripts/refresh.mjs` from the skill folder, and release a new version.
+`ui-component-catalog` is a catalog of shadcn-registry components from useLayouts, ui-layouts, beUI and React Bits, plus notes on css-loaders and the Sileo toast: what each is good for, which were used, adopted or rejected and why, and how to install or recreate them. `design-pass` uses it, and it also triggers on its own before any UI work. `reactbits-tools` points to the hosted React Bits tools for backgrounds, device mockups and logo marks.
 
 Also included, invoke-by-name only (they never trigger on their own): Emil Kowalski's motion skills (`animate`, `emil-design-eng`, `animation-performance`, `animation-vocabulary`, `improve-animations`, `find-animation-opportunities`, `review-animations`), `pick-ui-library`, and Anthropic's `frontend-design` (the better pick for login, onboarding and landing pages).
 
@@ -67,6 +67,10 @@ Third-party marketplaces don't auto-update by default. Run `claude plugin update
 ### Animate UI is not bundled
 
 The best-performing control-motion option in the trials was [Animate UI](https://animate-ui.com), but its license (MIT + Commons Clause) forbids redistributing it in a bundle. `design-pass` asks whether you want control motion and, if you do, tells you to run `npx skills add imskyleen/animate-ui` yourself.
+
+### Working on this repo
+
+[CONTRIBUTING.md](CONTRIBUTING.md) covers the repo layout, how `design-pass` chains its skills, the release and dev loops, third-party syncing and catalog updates.
 
 ### Licenses
 
