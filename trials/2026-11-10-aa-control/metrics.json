@@ -1,0 +1,40 @@
+{
+  "before": {
+    "build": "pass",
+    "js": 1160221,
+    "css": 108461,
+    "jsGzip": 354611,
+    "cssGzip": 18097
+  },
+  "A": {
+    "build": "pass",
+    "js": 1147646,
+    "css": 112129,
+    "jsGzip": 351898,
+    "cssGzip": 18647,
+    "commits": [
+      "849046d 0 design-pass: record Safe mode, no control motion, existing tokens are the brand lock",
+      "82e822b 1 design-taste-frontend: framed-sheet layout, underline tabs, honest states for Orders, Settings, Products",
+      "070d152 2 break-ui: dev-only ?worst=1 data; fix grouping, unrated dash, CJK/emoji initials, truncation titles",
+      "0f66a61 3 impeccable: polish + audit. Gray focus rings and selection, tablist roving tabindex and labels, tabpanel role, row-action aria-labels, aria-busy tables"
+    ],
+    "diff": "7 files changed, 527 insertions(+), 230 deletions(-)",
+    "uncommitted": 1,
+    "newPackages": []
+  },
+  "B": {
+    "build": "pass",
+    "js": 1149905,
+    "css": 111081,
+    "jsGzip": 352336,
+    "cssGzip": 18642,
+    "commits": [
+      "5ef15d3 1 design-taste-frontend: redesign Orders, Settings, Products (tabs, states, settings rows)",
+      "4f32731 2 break-ui: worst-case fixtures (?data=worst|one), dev toggle, fixes for long/missing/huge data",
+      "378f81a 3 impeccable: polish + audit (search inputs 36px, live result counts, rating text for screen readers)"
+    ],
+    "diff": "8 files changed, 511 insertions(+), 165 deletions(-)",
+    "uncommitted": 1,
+    "newPackages": []
+  }
+}

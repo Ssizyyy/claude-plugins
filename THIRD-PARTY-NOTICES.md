@@ -10,6 +10,7 @@ This repository bundles skills written by other people. Each keeps its own licen
 | `review-animations` | https://github.com/emilkowalski/skills | `85e8e2363b71` | MIT | no (already invoke-only upstream) |
 | `impeccable` | https://github.com/pbakaus/impeccable (Paul Bakaus) | `0d6b47ea19b6` (`.agents/skills/impeccable`) | Apache-2.0 (see its LICENSE and NOTICE.md) | no |
 | `frontend-design` | Anthropic's `frontend-design` skill (https://github.com/anthropics/skills) | `41bbe19d1a1a` | Apache-2.0 (see its LICENSE.txt) | added `disable-model-invocation: true` to the front matter, marked with a comment in the file |
+| `modern-web-guidance` | https://github.com/GoogleChrome/modern-web-guidance (`skills/modern-web-guidance`; authored in https://github.com/GoogleChrome/modern-web-guidance-src) | `4dd968349e54` | Apache-2.0 (see its LICENSE) | added `disable-model-invocation: true` to the front matter, marked with a comment in the file; every `modern-web-guidance@latest` in the text is pinned to `@1.0.0` (`replace` in `upstream.json`) |
 
 ## Component metadata in `ui-component-catalog`
 

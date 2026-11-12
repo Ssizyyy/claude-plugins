@@ -1,0 +1,42 @@
+{
+  "before": {
+    "build": "pass",
+    "js": 1172517,
+    "css": 113653,
+    "jsGzip": 358816,
+    "cssGzip": 18929
+  },
+  "A": {
+    "build": "pass",
+    "js": 1185121,
+    "css": 117008,
+    "jsGzip": 362781,
+    "cssGzip": 19459,
+    "commits": [
+      "c7dd50c 1 design-taste-frontend: rebuild settings, m-checkout, d-logs layout and states",
+      "535e94d 2 break-ui: dev-only worst-case toggle and fixes for the three screens",
+      "71729c5 3 impeccable polish: deleted-workspace feedback, hints, live regions, trailing rule",
+      "15cc45b 4 impeccable audit: off-switch non-text contrast, destructive text contrast, 44px edit target, aria-busy"
+    ],
+    "diff": "6 files changed, 530 insertions(+), 133 deletions(-)",
+    "uncommitted": 0,
+    "newPackages": []
+  },
+  "B": {
+    "build": "pass",
+    "js": 1191952,
+    "css": 118321,
+    "jsGzip": 365114,
+    "cssGzip": 19779,
+    "commits": [
+      "3d62362 B: consult modern-web-guidance in the impeccable step",
+      "62cfe5a 1 design-taste-frontend: layout and states for settings, m-checkout, d-logs",
+      "0bcc2b3 2 break-ui: worst-case fixtures (?data=worst) and fixes for settings, m-checkout, d-logs",
+      "6a9e614 3a impeccable: polish and audit on settings, m-checkout, d-logs",
+      "27cb917 3b impeccable: modern-web-guidance consult"
+    ],
+    "diff": "7 files changed, 623 insertions(+), 130 deletions(-)",
+    "uncommitted": 0,
+    "newPackages": []
+  }
+}

@@ -12,7 +12,9 @@ This repo is the public Claude Code marketplace `ssizyyy-plugins`. It currently 
 | `upstream.json` | Pinned upstream commits for every bundled third-party skill | No |
 | `THIRD-PARTY-NOTICES.md` | Source, pinned commit, license and local changes for every bundled third-party item | No (read on GitHub) |
 | `sandbox/` | Vite + React + shadcn app with fixture data, for trying skills. See [sandbox/README.md](sandbox/README.md) | No |
-| `scripts/` | Repo tooling: `sync-upstream.mjs`, `check-version-bump.mjs`, `check-private-names.mjs`, git hooks in `scripts/hooks/` | No |
+| `trials/` | `LOG.md` (every trialled skill and its verdict), `SLOP.md` (the defects planted in the slop screens), one folder per trial with its `report.md` | No |
+| `.claude/skills/skill-trial/` | The `/skill-trial` skill that runs a trial | No |
+| `scripts/` | Repo tooling: `sync-upstream.mjs`, `check-version-bump.mjs`, `check-private-names.mjs`, `skill-trial.mjs`, git hooks in `scripts/hooks/` | No |
 | `.github/workflows/checks.yml` | CI | No |
 | `CLAUDE.md` | The hard rules for agents working here; it points back to this file | No |
 
@@ -28,7 +30,7 @@ Only what the marketplace's `source` points at (`./plugins/design-stack`) reache
 | 0. Lock, prepare, ask | none | Lock tokens, fonts, dependencies and behaviour; offer a design system if tokens are thin; ask Safe or Free mode; add a fixture fallback; screenshot the before |
 | 1. Layout and states | `design-taste-frontend` | Composition, hierarchy, loading/empty/error states; picks components from `ui-component-catalog` |
 | 2. Stress | `break-ui` | Worst-case data |
-| 3. Finish | `impeccable` (polish, then audit) | Detail and accessibility |
+| 3. Finish | `impeccable` (polish, then audit), consulting `modern-web-guidance` before fixing a control | Detail and accessibility |
 | 4. Motion (opt-in) | Animate UI, installed by the user | Control motion; not bundled because of its license |
 | 5. Prove it | none | Typecheck, build, before/after screenshots |
 
@@ -36,7 +38,7 @@ Login, onboarding and landing pages swap step 1 for `frontend-design`, which bea
 
 The order came from blind A/B trials, summarised in the Evidence section of `plugins/design-stack/skills/design-pass/SKILL.md`. Read that before reordering steps or adding one.
 
-Claude can pick up `design-pass`, the skills it runs (`design-taste-frontend`, `break-ui`, `impeccable`), `ui-component-catalog` and `reactbits-tools` on its own. Emil Kowalski's motion skills, `pick-ui-library` and `frontend-design` are invoke-only (`disable-model-invocation: true` in the front matter) and run only when a user names them. New helper or third-party skills default to invoke-only unless `design-pass` runs them, because every model-invocable skill adds its description to every session's context.
+Claude can pick up `design-pass`, the skills it runs (`design-taste-frontend`, `break-ui`, `impeccable`), `ui-component-catalog` and `reactbits-tools` on its own. Emil Kowalski's motion skills, `pick-ui-library`, `frontend-design` and `modern-web-guidance` are invoke-only (`disable-model-invocation: true` in the front matter) and run only when a user names them. New helper or third-party skills default to invoke-only unless `design-pass` runs them, because every model-invocable skill adds its description to every session's context.
 
 ## Release loop
 
@@ -88,6 +90,20 @@ node scripts/sync-upstream.mjs bump <skill...>   # move the pins to upstream HEA
 The script also applies the front-matter patches listed in `upstream.json` (mostly `disable-model-invocation: true`) and prints the git diff. To add a skill, add an entry to `upstream.json`, run `sync`, and add a row to `THIRD-PARTY-NOTICES.md` with its source, pinned commit, license and what changed. Check the license allows redistribution: Animate UI is left out because Commons Clause forbids it.
 
 A sync changes files under `plugins/`, so it needs a version bump like any other change.
+
+## Trialling a skill
+
+A skill from the internet joins `design-stack` only after a logged adopt. `/skill-trial <owner/repo> [path]` (`.claude/skills/skill-trial/SKILL.md`) runs the trial:
+
+1. `scripts/skill-trial.mjs fetch` pins the candidate to a commit under `trials/candidates/`, and you read it in full before anything runs.
+2. It is checked for name and trigger collisions and for rules that contradict `design-pass`'s locks, then given a slot: challenger, new step, helper or reference.
+3. `scripts/skill-trial.mjs setup` makes one git worktree per variant. A is the current pipeline; B is `design-pass` with the candidate in its slot. Each variant runs the design pass on the same screens in its own sub-session.
+4. A blind side-by-side page (`judge`) shows the results unlabeled and you pick the winner per screen. A control that runs A against A shows how much noise the judging has.
+5. The verdict (adopt, reject or park) goes in `trials/LOG.md` with a report under `trials/<date>-<skill>/`. A reject is retried only when the candidate's pinned commit changes.
+
+The screens tagged `slop` in `sandbox/src/App.tsx` are deliberately careless first drafts and the fixed input for trials. `trials/SLOP.md` lists the defects planted in them, and the script deletes `trials/` inside every variant worktree so the skill under test never sees that list. Don't clean the slop screens up on `main`.
+
+An adopted skill then follows the third-party steps above.
 
 ## Updating the component catalog
 

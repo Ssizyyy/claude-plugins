@@ -1,74 +1,63 @@
 import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { orders, type Status } from "@/fixtures"
+import { getOrders } from "@/api"
+import type { Status } from "@/fixtures"
+import { useAsync } from "@/useAsync"
 
-const statusColor: Record<Status, string> = {
-  paid: "bg-green-100 text-green-800",
-  pending: "bg-yellow-100 text-yellow-800",
-  refunded: "bg-gray-100 text-gray-700",
-  failed: "bg-red-100 text-red-700",
+const status: Record<Status, [string, string, string]> = {
+  paid: ["✅", "#bbf7d0", "#86efac"],
+  pending: ["⏳", "#fef9c3", "#fde047"],
+  refunded: ["↩️", "#f3f4f6", "#d1d5db"],
+  failed: ["❌", "#fee2e2", "#fca5a5"],
 }
 
 export default function Orders() {
+  const { data } = useAsync(getOrders)
   const [q, setQ] = useState("")
-  const [status, setStatus] = useState("all")
-  const rows = orders.filter(
-    (o) => (status === "all" || o.status === status) && `${o.id} ${o.customer} ${o.email}`.toLowerCase().includes(q.toLowerCase()),
-  )
+  const rows = (data ?? []).filter((o) => `${o.id} ${o.customer} ${o.email}`.toLowerCase().includes(q.toLowerCase()))
 
   return (
-    <main className="mx-auto max-w-6xl space-y-4 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Orders</h1>
-        <Button>New order</Button>
+    <main className="mx-auto max-w-6xl p-[22px] text-center">
+      <h1 className="bg-clip-text text-4xl font-extrabold text-transparent" style={{ backgroundImage: "linear-gradient(90deg,#6366f1,#a855f7,#ec4899)" }}>
+        🛒 Orders Dashboard
+      </h1>
+      <p className="text-4xl font-extrabold">Manage everything in one place ✨</p>
+      <div className="mt-[13px] flex justify-center gap-[5px]">
+        {["New order", "Export", "Import", "Refresh", "Bulk edit"].map((b) => (
+          <button key={b} className="rounded-2xl px-4 py-2 text-sm font-bold text-white shadow-lg outline-none" style={{ background: "linear-gradient(135deg,#6366f1,#a855f7)" }}>
+            {b}
+          </button>
+        ))}
       </div>
-      <div className="flex gap-2">
-        <Input placeholder="Search orders" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {["all", "paid", "pending", "refunded", "failed"].map((s) => (
-              <SelectItem key={s} value={s}>
-                {s === "all" ? "All statuses" : s[0].toUpperCase() + s.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="search" className="mt-[9px] w-40 rounded-2xl border px-3 py-1 text-center text-xs outline-none placeholder:text-gray-300" />
+      <div className="mt-[17px] rounded-2xl bg-white p-4 shadow-lg">
+        <div className="rounded-2xl bg-white p-3 shadow-lg">
+          <table className="w-full" style={{ fontSize: 13 }}>
+            <thead>
+              <tr>
+                {["Order", "Customer", "Email", "Date", "Status", "Total"].map((h) => (
+                  <th key={h} className="p-[7px]" style={{ color: "#6366f1" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((o) => (
+                <tr key={o.id}>
+                  <td className="p-[7px] font-bold">{o.id}</td>
+                  <td className="p-[7px] font-bold">{o.customer}</td>
+                  <td className="p-[7px] font-bold whitespace-nowrap">{o.email}</td>
+                  <td className="p-[7px] font-bold">{o.date}</td>
+                  <td className="p-[7px]">
+                    <span className="rounded-2xl px-2 py-1 font-bold shadow-lg" style={{ background: status[o.status][1], color: status[o.status][2] }}>
+                      {status[o.status][0]} {o.status}
+                    </span>
+                  </td>
+                  <td className="p-[7px] font-bold">${o.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Order</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.map((o) => (
-            <TableRow key={o.id}>
-              <TableCell className="font-medium">{o.id}</TableCell>
-              <TableCell>
-                <div>{o.customer}</div>
-                <div className="text-gray-500">{o.email}</div>
-              </TableCell>
-              <TableCell>{o.date}</TableCell>
-              <TableCell>
-                <Badge className={statusColor[o.status]}>{o.status}</Badge>
-              </TableCell>
-              <TableCell className="text-right">${o.total.toFixed(2)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {rows.length === 0 && <p className="text-sm text-gray-500">No orders match.</p>}
     </main>
   )
 }

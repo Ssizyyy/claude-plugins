@@ -1,84 +1,50 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
+import { useState } from "react"
+import { save } from "@/api"
 import { user } from "@/fixtures"
 
 const notifications = [
-  ["New orders", "Email me when an order is placed"],
-  ["Failed payments", "Email me when a payment fails"],
-  ["Weekly summary", "A digest every Monday morning"],
+  ["📦 New orders", "Email me when an order is placed"],
+  ["💸 Failed payments", "Email me when a payment fails"],
+  ["📊 Weekly summary", "A digest every Monday morning, with revenue, orders, refunds and the five best-selling products of the week"],
 ]
 
 export default function Settings() {
+  const [on, setOn] = useState<Record<string, boolean>>({})
+  const input = "w-full rounded-2xl border px-3 py-1 text-center text-sm outline-none placeholder:text-gray-300"
+
   return (
-    <main className="mx-auto max-w-3xl space-y-4 p-6">
-      <h1 className="text-2xl font-semibold">Settings</h1>
-      <Tabs defaultValue="profile">
-        <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="danger">Danger zone</TabsTrigger>
-        </TabsList>
-        <TabsContent value="profile">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile</CardTitle>
-              <CardDescription>How you appear to your team.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" defaultValue={user.name} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue={user.email} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea id="bio" placeholder="A few words about you" />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Save</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        <TabsContent value="notifications">
-          <Card>
-            <CardContent className="space-y-4">
-              {notifications.map(([title, desc], i) => (
-                <div key={title}>
-                  {i > 0 && <Separator className="mb-4" />}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">{title}</div>
-                      <div className="text-sm text-gray-500">{desc}</div>
-                    </div>
-                    <Switch defaultChecked={i === 0} />
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="danger">
-          <Card>
-            <CardHeader>
-              <CardTitle>Delete workspace</CardTitle>
-              <CardDescription>This removes {user.company} and all of its orders. It can't be undone.</CardDescription>
-            </CardHeader>
-            <CardFooter>
-              <Button variant="destructive">Delete workspace</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
+    <main className="mx-auto max-w-3xl p-[19px] text-center" style={{ background: "#faf5ff" }}>
+      <h1 className="text-3xl font-bold" style={{ color: "#8b5cf6" }}>⚙️ Settings</h1>
+      <div className="mt-[11px] rounded-2xl bg-white p-4 shadow-lg">
+        <div className="text-3xl font-bold">Profile</div>
+        <div className="mt-[7px] rounded-2xl bg-white p-3 shadow-lg">
+          <div className="rounded-2xl bg-white p-3 shadow-lg">
+            <input className={input} style={{ borderColor: "#e9d5ff" }} placeholder="Name" defaultValue={user.name} />
+            <input className={`${input} mt-[5px]`} style={{ borderColor: "#e9d5ff" }} placeholder="Email" defaultValue={user.email} />
+            <textarea className={`${input} mt-[5px]`} style={{ borderColor: "#e9d5ff" }} placeholder="A few words about you" />
+          </div>
+        </div>
+        <div className="mt-[13px] text-3xl font-bold">Notifications</div>
+        <div className="mt-[7px] rounded-2xl bg-white p-3 shadow-lg">
+          {notifications.map(([title, desc]) => (
+            <div key={title} className="mt-[4px]" onClick={() => setOn({ ...on, [title]: !on[title] })}>
+              <span className="text-sm font-bold">{on[title] ? "✅" : "⬜"} {title}</span>
+              <div className="text-xs whitespace-nowrap" style={{ color: "#c4c4c4" }}>{desc}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-[13px] text-3xl font-bold">Danger zone</div>
+        <div className="mt-[7px] rounded-2xl bg-white p-3 shadow-lg">
+          <div className="text-xs" style={{ color: "#c4c4c4" }}>This removes {user.company} and all of its orders.</div>
+        </div>
+        <div className="mt-[15px] flex justify-center gap-1">
+          {["Save", "Save and close", "Reset", "Delete workspace"].map((b) => (
+            <button key={b} onClick={() => save(b)} className="rounded-2xl px-4 py-2 text-sm font-bold text-white shadow-lg outline-none" style={{ background: "linear-gradient(135deg,#6366f1,#a855f7)" }}>
+              {b}
+            </button>
+          ))}
+        </div>
+      </div>
     </main>
   )
 }

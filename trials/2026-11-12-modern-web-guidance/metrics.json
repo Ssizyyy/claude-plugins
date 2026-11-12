@@ -1,0 +1,54 @@
+{
+  "before": {
+    "build": "pass",
+    "js": 1172517,
+    "css": 113653,
+    "jsGzip": 358816,
+    "cssGzip": 18929
+  },
+  "A": {
+    "build": "pass",
+    "js": 1190182,
+    "css": 118748,
+    "jsGzip": 364041,
+    "cssGzip": 19800,
+    "commits": [
+      "1450620 0 lock-and-prepare: Safe mode, tokens locked (Tailwind gray + Geist, indigo only inside shadcn controls), no motion, before shots taken",
+      "55646aa 1 design-taste-frontend: rebuild settings, m-checkout, d-logs layout and states (no emoji/gradients, labels, validation, loading/empty/error, confirm delete)",
+      "788ca04 2 break-ui: dev-only worst-case toggle (?data=worst|empty|many); wrap long strings, empty-message placeholder, source tooltip, content-visibility for 2,000 rows",
+      "3755305 3 impeccable polish + audit: focus first invalid field, 44px edit targets, safe-area footer, aria fixes, lint clean on touched files"
+    ],
+    "diff": "7 files changed, 579 insertions(+), 114 deletions(-)",
+    "uncommitted": 0,
+    "newPackages": []
+  },
+  "B": {
+    "build": "pass",
+    "js": 1186022,
+    "css": 117941,
+    "jsGzip": 363232,
+    "cssGzip": 19617,
+    "commits": [
+      "e580d64 B: consult modern-web-guidance in the impeccable step",
+      "3a474cd 0 design-pass: lock brand (existing gray/indigo/red palette + Geist), mode Safe, no motion, fake API already renders in browser",
+      "5e8be26 1 design-taste-frontend: layout and states for settings, m-checkout, d-logs",
+      "4ee5820 2 break-ui: ?data=worst fixtures; fixed-layout log table, 200-row windowing, anywhere-wrap in checkout address",
+      "4387f85 3 impeccable: polish (focus on invalid field, scroll reset, slug ids, deleted state) and audit; modern-web-guidance searches were blocked",
+      "8e2455c 3b impeccable: modern-web-guidance consult"
+    ],
+    "diff": "6 files changed, 484 insertions(+), 129 deletions(-)",
+    "uncommitted": 0,
+    "newPackages": []
+  },
+  "S": {
+    "build": "pass",
+    "js": 1174010,
+    "css": 114212,
+    "jsGzip": 359203,
+    "cssGzip": 19059,
+    "commits": [],
+    "diff": "1 file changed, 69 insertions(+), 45 deletions(-)",
+    "uncommitted": 1,
+    "newPackages": []
+  }
+}

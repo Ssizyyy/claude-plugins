@@ -47,6 +47,13 @@ Feed every screen worst-case fixture data: long names, zero, huge counts, missin
 
 Run impeccable's `polish` and then its `audit` on each screen, and fix what they flag. Decline anything that touches the locks from step 0. Skip impeccable's `colorize`, because colour is locked.
 
+Before fixing a control (dialog, popover, select, form field, table, tooltip, focus, validation), consult `design-stack:modern-web-guidance`. It is invoke-only, so read `../modern-web-guidance/SKILL.md` (relative to this skill's base directory) and follow its search and retrieve steps. It is a reference: the project's component (shadcn) stays the component, and the guide shapes the CSS, accessibility and fallbacks inside it. Rules:
+- Set `DISABLE_TELEMETRY=1` on every command: by default the CLI sends the search query to Google.
+- Run only `search` and `retrieve`, never `legacy-scan`, `install` or `update`.
+- The CLI downloads from npm (`npx -y modern-web-guidance@1.0.0`). If the permission prompt or classifier refuses, skip the consult and say so in the report; don't look for another route.
+- In Safe mode, ignore guide advice that adds a package, polyfill or CDN script. In Free mode, follow it and report it.
+- Skip its `### Modern Web Guidance` disclosure section; list the guide ids you applied in the step report instead.
+
 ## 4. Motion (only if the user said yes in step 0)
 
 The tested choice for control motion is **Animate UI at its expressive level**. It is not bundled here because its license (MIT + Commons Clause) forbids redistributing it, so install it yourself in the project:
@@ -76,5 +83,6 @@ All trials were on one desktop app (Tauri + React + shadcn), judged blind by one
 - **Trial 1 (Orders, Settings, Login; 4 variants).** taste + Emil + impeccable won Orders and Settings, and frontend-design alone won Login. taste + Emil came last, below taste alone.
 - **Trial 2 (a log page; 3 orders).** taste, then break-ui, then impeccable (no Emil) won, judged live as well as in screenshots. impeccable-first came second. The order with Emil's motion before impeccable came last.
 - **Trial 3 (controls on two screens; no Animate UI vs Animate UI at three levels, judged live).** Ranking on both: expressive 1st, subtle 2nd, no Animate UI 3rd, "more" (subtle plus overshoot and blur) 4th. The ranking is not monotonic in how much motion there is.
+- **Trial 4 (modern-web-guidance as a reference in step 3; settings, checkout, logs; two runs).** With the guides, B won all three screens, then won two and tied one on the rerun, and never lost to the same pipeline without them. The guide step itself changed little code, so the size of the effect is unknown. Both runs were fed six guides picked by hand, not the skill's own search.
 
 What held: impeccable last appears in every winner of the layout trials; Emil's motion skills hurt as a whole-screen step; control-level motion from Animate UI at expressive was preferred over none. Still open: whether impeccable-first beats impeccable-last without Emil, and why "more" lost. It is a small sample: one app, one judge. If your project shows otherwise, trust the project.
