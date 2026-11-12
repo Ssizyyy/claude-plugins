@@ -2,6 +2,13 @@
 
 Installs only pick up a release when `version` in `.claude-plugin/plugin.json` changes.
 
+## 2.4.0 (2026-11-12)
+
+- New invoke-only skill `modern-web-guidance` (Google Chrome, Edge, Firefox and MDN teams; Apache-2.0), bundled at upstream commit `4dd968349e54`. Step 3 of `design-pass` now consults it before fixing dialogs, popovers, selects, form fields, tables, tooltips, focus and validation. It is a reference only: the shadcn component stays, the guide shapes CSS, accessibility and fallbacks.
+- The skill's `npx` commands are pinned to `modern-web-guidance@1.0.0` instead of `@latest`, and `design-pass` sets `DISABLE_TELEMETRY=1` (the CLI sends search queries to Google by default). The CLI needs network access; if the permission prompt refuses it, `design-pass` skips the consult and says so.
+- `scripts/sync-upstream.mjs` supports a `replace` map in `upstream.json` for pinning text in bundled skills.
+- Evidence: blind trial, two runs, in `design-pass` under Evidence.
+
 ## 2.3.0 (2026-10-24)
 
 - `design-pass` is now the single entry point. New intake step: when asked to build or design new screens or an app, it reads the repo, runs an adaptive interview (the `grilling` skill, no fixed questions), shows a plan table for approval, then builds each screen and runs the existing steps on it.

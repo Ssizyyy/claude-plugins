@@ -127,6 +127,21 @@
       "frontmatter": {
         "disable-model-invocation": true
       }
+    },
+    "modern-web-guidance": {
+      "dest": "plugins/design-stack/skills/modern-web-guidance",
+      "repo": "GoogleChrome/modern-web-guidance",
+      "path": "skills/modern-web-guidance",
+      "commit": "4dd968349e54ca45a05dd5c818fb035c9054b022",
+      "files": {
+        "LICENSE": "LICENSE"
+      },
+      "frontmatter": {
+        "disable-model-invocation": true
+      },
+      "replace": {
+        "modern-web-guidance@latest": "modern-web-guidance@1.0.0"
+      }
     }
   }
 }
