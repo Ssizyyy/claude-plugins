@@ -2,13 +2,21 @@
 
 Installs only pick up a release when `version` in `.claude-plugin/plugin.json` changes.
 
-## 2.4.0 (2026-10-24)
+## 2.5.0 (2026-11-12)
 
 - Mode is chosen by the skill you start, not by a question. `design-pass` is Safe (no new packages, no motion). New `design-pass-free` is Free (no dependency lock, heavy effects allowed, control motion included). It is model-invocable for premium-look requests ("I want a premium looking app") and counts such a request as the yes to Free and motion. The shared procedure moved to `design-pass/references/core.md`.
 - In Free mode the React Bits tools (`reactbits-tools`) are used without being asked, for heroes, empty states and product shots with no fitting catalog item. Downloads still need your yes.
 - New invoke-only `control-motion`: the Animate UI expressive step, runnable on its own after a Safe pass.
 - Fixes from a Free-mode trial on the sandbox: a precedence section in `core.md` (the locks outrank third-party skill text; no questions, fix instead of report), a default when nobody can answer the design-system offer, allowed fake-API and `?data=worst` hooks, light-only before shots when the app has no dark mode, a note on stale inspector state and hash-router anchors; `control-motion` now states its real cost range and what to do on screens without selection controls; `reactbits-tools` saves exports from inside the page when downloads are unavailable.
 - `design-pass` no longer reads or writes the `design-pass mode:` line in `DESIGN.md`; an existing line is ignored.
+- The step-3 `modern-web-guidance` consult and the Trial 4 evidence line from 2.4.0 now live in `design-pass/references/core.md`.
+
+## 2.4.0 (2026-11-12)
+
+- New invoke-only skill `modern-web-guidance` (Google Chrome, Edge, Firefox and MDN teams; Apache-2.0), bundled at upstream commit `4dd968349e54`. Step 3 of `design-pass` now consults it before fixing dialogs, popovers, selects, form fields, tables, tooltips, focus and validation. It is a reference only: the shadcn component stays, the guide shapes CSS, accessibility and fallbacks.
+- The skill's `npx` commands are pinned to `modern-web-guidance@1.0.0` instead of `@latest`, and `design-pass` sets `DISABLE_TELEMETRY=1` (the CLI sends search queries to Google by default). The CLI needs network access; if the permission prompt refuses it, `design-pass` skips the consult and says so.
+- `scripts/sync-upstream.mjs` supports a `replace` map in `upstream.json` for pinning text in bundled skills.
+- Evidence: blind trial, two runs, in `design-pass` under Evidence.
 
 ## 2.3.0 (2026-10-24)
 

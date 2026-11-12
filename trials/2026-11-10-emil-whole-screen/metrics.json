@@ -1,0 +1,41 @@
+{
+  "before": {
+    "build": "pass",
+    "js": 1160221,
+    "css": 108461,
+    "jsGzip": 354611,
+    "cssGzip": 18097
+  },
+  "A": {
+    "build": "pass",
+    "js": 1154451,
+    "css": 113148,
+    "jsGzip": 353735,
+    "cssGzip": 18883,
+    "commits": [
+      "df60b35 1 design-taste-frontend: ledger-style layout and states for Orders, Settings, Products",
+      "bd0edff 2 break-ui: worst-case fixtures, dev-only data toggle, fixes for guest orders, missing email, narrow product price row",
+      "818e303 3 impeccable: polish + audit - text-pretty on finding and description lines; audit 17/20, remaining flags are shared nav and fixture placeholders outside scope"
+    ],
+    "diff": "8 files changed, 753 insertions(+), 192 deletions(-)",
+    "uncommitted": 0,
+    "newPackages": []
+  },
+  "B": {
+    "build": "pass",
+    "js": 1154154,
+    "css": 112919,
+    "jsGzip": 353974,
+    "cssGzip": 18928,
+    "commits": [
+      "8221a8d trial setup: insert whole-screen Emil motion as step 2b",
+      "2bb9811 1 design-taste-frontend: layout and states for Orders, Settings, Products",
+      "87d661d 2 break-ui: worst-case fixtures behind ?data=, truncation, wrapping, separators, grapheme initials, phone layouts",
+      "a2b8993 2b emil-design-eng + animate: first-load stagger, tab underline slide, press feedback, status stamp fades, reduced-motion fallback",
+      "089ae76 3 impeccable: polish + audit - 36px settings tabs, 32px retry target; no contrast, name, overflow or console findings"
+    ],
+    "diff": "9 files changed, 665 insertions(+), 173 deletions(-)",
+    "uncommitted": 1,
+    "newPackages": []
+  }
+}

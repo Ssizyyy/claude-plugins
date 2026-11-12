@@ -1,0 +1,41 @@
+{
+  "before": {
+    "build": "pass",
+    "js": 1160221,
+    "css": 108461,
+    "jsGzip": 354611,
+    "cssGzip": 18097
+  },
+  "A": {
+    "build": "pass",
+    "js": 1169632,
+    "css": 109885,
+    "jsGzip": 358192,
+    "cssGzip": 18305,
+    "commits": [
+      "a8f9002 1 design-taste-frontend: layout and states for Orders, Settings, Products",
+      "51a2db7 2 break-ui: worst-case fixtures, dev-only data toggle, fixes",
+      "e251bfa 3 impeccable polish + audit: icon for rating, contrast, live regions, touch size"
+    ],
+    "diff": "7 files changed, 412 insertions(+), 126 deletions(-)",
+    "uncommitted": 0,
+    "newPackages": []
+  },
+  "B": {
+    "build": "pass",
+    "js": 1172047,
+    "css": 111257,
+    "jsGzip": 358268,
+    "cssGzip": 18623,
+    "commits": [
+      "8eb6796 trial setup: insert whole-screen Emil motion as step 2b",
+      "1063f5d 1 design-taste-frontend: layout and states for Orders, Settings, Products",
+      "21c2570 2 break-ui: worst-case data toggle, mobile Orders table, product stock and rating fixes",
+      "74995b9 2b emil-design-eng + animate: whole-screen motion for Orders, Settings, Products",
+      "857170e 3 impeccable: polish and audit for Orders, Settings, Products"
+    ],
+    "diff": "9 files changed, 632 insertions(+), 146 deletions(-)",
+    "uncommitted": 0,
+    "newPackages": []
+  }
+}

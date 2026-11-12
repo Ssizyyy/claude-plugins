@@ -1,9 +1,9 @@
 // Re-copies third-party skills from their pinned upstream commits (upstream.json), applies the
-// front-matter patches, and shows the resulting git diff. Node 18+ and git, no dependencies.
+// front-matter patches and text replacements (upstream.json `replace`), and shows the resulting git diff. Node 18+ and git, no dependencies.
 // Usage: node scripts/sync-upstream.mjs sync [skill...]   copy the pinned commits (all skills by default)
 //        node scripts/sync-upstream.mjs bump <skill...>   move the pins to upstream HEAD, then sync those
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -39,6 +39,19 @@ function patchFrontmatter(text, keys) {
   return text.replace(m[0], `---\n${m[1]}\n${lines}\n---`);
 }
 
+// replace text in every .md file under dir (pins a version in commands the skill tells the agent to run)
+function replaceText(dir, pairs) {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const f = join(dir, e.name);
+    if (e.isDirectory()) replaceText(f, pairs);
+    else if (e.name.endsWith('.md')) {
+      const t = readFileSync(f, 'utf8');
+      const r = Object.entries(pairs).reduce((x, [a, b]) => x.split(a).join(b), t);
+      if (r !== t) writeFileSync(f, r);
+    }
+  }
+}
+
 function sync(name) {
   const s = manifest.skills[name];
   if (!s) throw new Error(`unknown skill: ${name} (see upstream.json)`);
@@ -56,6 +69,7 @@ function sync(name) {
     const md = join(dest, 'SKILL.md');
     writeFileSync(md, patchFrontmatter(readFileSync(md, 'utf8'), s.frontmatter));
   }
+  if (s.replace) replaceText(dest, s.replace);
   console.log(`${name}: ${s.repo}@${s.commit.slice(0, 12)} -> ${s.dest}`);
 }
 
