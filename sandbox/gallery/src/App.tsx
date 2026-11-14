@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
-import { Card, STATUS_STYLE } from './Card'
+import { Card, itemHref, STATUS_STYLE } from './Card'
+import { Detail } from './Detail'
+import type { StageMode } from './Preview'
 import type { Item, Picks, PickStatus, Status, Weight } from './types'
 
 const STATUSES: Status[] = ['used', 'adopted', 'candidate', 'unreviewed', 'rejected', 'deleted']
@@ -67,7 +69,22 @@ export default function App() {
   const [statuses, setStatuses] = useState<Set<Status>>(new Set(STATUSES.filter((s) => s !== 'deleted')))
   const [surfaces, setSurfaces] = useState<Set<string>>(new Set(SURFACES))
   const [weights, setWeights] = useState<Set<Weight>>(new Set(WEIGHTS))
+  const [stage, setStage] = useState<StageMode>('auto')
   const [dark, setDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches)
+
+  // #/item/<source>/<key> opens the detail page; the grid stays mounted (hidden) so filters and scroll survive
+  const [hash, setHash] = useState(location.hash)
+  const scrollY = useRef(0)
+  const wasOpen = useRef(false)
+  useEffect(() => {
+    const on = () => {
+      if (location.hash.startsWith('#/item/') && !wasOpen.current) scrollY.current = window.scrollY
+      setHash(location.hash)
+    }
+    addEventListener('hashchange', on)
+    return () => removeEventListener('hashchange', on)
+  }, [])
+  const detailId = hash.startsWith('#/item/') ? decodeURIComponent(hash.slice(7)) : ''
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
@@ -104,6 +121,24 @@ export default function App() {
     )
   })
 
+  const detailIdx = visible.findIndex(({ item }) => item.id === detailId)
+  const detailRow = detailIdx >= 0 ? visible[detailIdx] : rows.find(({ item }) => item.id === detailId)
+  useEffect(() => {
+    if (detailId && !wasOpen.current) scrollTo(0, 0)
+    else if (!detailId && wasOpen.current) scrollTo(0, scrollY.current)
+    wasOpen.current = !!detailId
+  }, [detailId])
+  const back = useCallback(() => {
+    history.replaceState(null, '', location.pathname + location.search)
+    setHash('')
+  }, [])
+  const step = (d: -1 | 1) => {
+    if (visible.length < 2) return
+    const next = visible[(Math.max(detailIdx, 0) + d + visible.length) % visible.length].item
+    history.replaceState(null, '', location.pathname + location.search + itemHref(next))
+    setHash(itemHref(next).slice(0))
+  }
+
   const sources = [...new Set(items.map((i) => i.source))]
   const families = [...new Set(items.filter((i) => !source || i.source === source).map((i) => i.family))].sort()
   const count = (f: (i: Item) => boolean) => items.filter(f).length
@@ -118,7 +153,22 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
+      {detailRow && (
+        <Detail
+          item={detailRow.item}
+          weight={detailRow.weight}
+          status={statusOf(detailRow.item)}
+          pick={picks[detailRow.item.id]}
+          onPick={onPick}
+          stage={stage}
+          index={Math.max(detailIdx, 0)}
+          total={visible.length || 1}
+          onBack={back}
+          onStep={step}
+        />
+      )}
+      <div className={cn('flex min-h-screen flex-col', detailId && 'hidden')}>
       <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur">
         <h1 className="text-lg font-semibold">UI gallery</h1>
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title, key, description, notes" aria-label="Search" className="max-w-sm" />
@@ -129,6 +179,9 @@ export default function App() {
         <div className="ml-auto flex gap-2">
           <Button variant="outline" size="sm" onClick={exportPicks}>
             Export picks ({Object.keys(picks).length})
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setStage((s) => (s === 'auto' ? 'light' : s === 'light' ? 'dark' : 'auto'))} title="Background behind every preview: auto (dark for backgrounds), light, dark">
+            Previews: {stage}
           </Button>
           <Button variant="outline" size="sm" onClick={() => setDark((d) => !d)} aria-pressed={dark}>
             {dark ? 'Light' : 'Dark'}
@@ -186,14 +239,15 @@ export default function App() {
             </div>
           </div>
           {loadError && <p className="text-destructive">{loadError}</p>}
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(460px,1fr))] gap-4">
             {visible.map(({ item, weight }) => (
-              <Card key={item.id} item={item} weight={weight} status={statusOf(item)} pick={picks[item.id]} onPick={onPick} />
+              <Card key={item.id} item={item} weight={weight} status={statusOf(item)} pick={picks[item.id]} onPick={onPick} stage={stage} />
             ))}
           </div>
           {!visible.length && !loadError && <p className="py-16 text-center text-muted-foreground">Nothing matches these filters.</p>}
         </main>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

@@ -61,5 +61,11 @@ export default defineConfig({
   plugins: [react(), tailwindcss(), galleryApi()],
   resolve: { alias: { '@': here('./src') } },
   // third-party previews that fail to compile must not cover the gallery with an overlay
+  // Items are found by glob, not imported statically, so Vite would discover their packages one by one at runtime and
+  // reload the page each time, leaving previews stuck on "loading". Scan the items up front and pre-bundle the heavy ones.
+  optimizeDeps: {
+    entries: ['index.html', 'src/items/**/*.{tsx,jsx}'],
+    include: ['three', 'three/examples/jsm/environments/RoomEnvironment.js', 'gsap', 'gsap/ScrollTrigger', '@gsap/react', 'ogl', 'motion/react', 'framer-motion', '@hugeicons/react', '@hugeicons/core-free-icons', '@number-flow/react', 'lucide-react', 'radix-ui'],
+  },
   server: { hmr: { overlay: false }, fs: { allow: ['..'] } },
 })
