@@ -60,3 +60,13 @@ Applying picks to `curated.json`, refreshing and releasing is a separate step.
 - `node_modules/`, `dist/`.
 
 `picks.json` and `ranking.json` are committed on purpose (your review and the hint output).
+
+## Categories
+
+`categories.json` (committed) holds three groups the user edits on the **Categories** screen (`#/categories`): **Tone** (one per item), **Role** and **Style** (several, style may stay empty). Each value has a stable `id`, a `label` and its place in the list is its order. A Tone value may carry `surface` (`app` or `marketing`, which overrides the item's own surface tag in the Surface filter) and a `rule` (Showpiece / silly: never in Safe mode, Free mode only on request).
+
+- Assignments live in `picks.json` next to status: `tone`, `roles[]`, `styles[]`. The ranking never writes them.
+- Removing a value that items still use asks first. Those items keep the id and show it flagged "removed" until unassigned.
+- Assign by chip on the detail page, by key in the detail page and review queue (**1-9** set the Tone, press again to clear; A/C/R/D still set the status and advance), or in bulk: tick cards in the grid, then use the bar that appears.
+- Filter by any value (several in one group = any of them), or by **Uncategorized** (no Tone and no Role). Counts show per value; filters are saved in localStorage. Export picks includes the category lists.
+- `/gallery-rank` also writes `suggested: { tone, roles[], reason }` into `ranking.json`. It shows as a dashed "Suggested" chip with one-click accept, offered only for what the user hasn't assigned.

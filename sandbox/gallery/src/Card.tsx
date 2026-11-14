@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { Preview, stageFor, type Stage, type StageMode } from './Preview'
-import { hintFor, type Item, type Pick, type PickStatus, type Rank, type Status, type Weight } from './types'
+import { CatChips, Suggestion } from './Cats'
+import { hintFor, type Categories, type CatPatch, type Item, type Pick, type PickStatus, type Rank, type Status, type Weight } from './types'
 
 export const STATUS_STYLE: Record<Status, string> = {
   used: 'bg-info text-info-foreground',
@@ -22,7 +23,8 @@ const ACTIONS: { status: PickStatus; label: string }[] = [
   { status: 'deleted', label: 'Delete' },
 ]
 
-export type OnPick = (id: string, patch: { status?: PickStatus | null; note?: string }) => void
+export type PickPatch = { status?: PickStatus | null; note?: string } & CatPatch
+export type OnPick = (id: string, patch: PickPatch) => void
 
 export const depList = (item: Item) => item.dependencies.map((d) => d.replace(/@[\^~]?[\d.]+$/, '')).join(', ') || 'no deps'
 export const itemHref = (item: Item) => `#/item/${item.source}/${item.key}`
@@ -138,6 +140,9 @@ export function Card({
   weight,
   pick,
   rank,
+  cats,
+  selected,
+  onSelect,
   onPick,
   stage,
 }: {
@@ -146,6 +151,9 @@ export function Card({
   weight: Weight
   pick?: Pick
   rank?: Rank
+  cats: Categories
+  selected: boolean
+  onSelect: (id: string) => void
   onPick: OnPick
   stage: StageMode
 }) {
@@ -158,6 +166,7 @@ export function Card({
       <Preview item={item} stage={shown} className="h-96" />
       <header className="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
         <div className="flex flex-wrap items-center gap-1.5">
+          <input type="checkbox" checked={selected} onChange={() => onSelect(item.id)} aria-label={`Select ${item.title}`} className="size-4" />
           <Badge className={cn('border-transparent', STATUS_STYLE[status])}>{status}</Badge>
           {pick?.status && <span className="text-xs text-muted-foreground">picked</span>}
           <span className="ml-auto text-xs text-muted-foreground">{item.source}</span>
@@ -168,6 +177,8 @@ export function Card({
           </a>
         </h3>
         <code className="text-xs text-muted-foreground">{item.key}</code>
+        <CatChips pick={pick} cats={cats} />
+        <Suggestion pick={pick} rank={rank} cats={cats} onApply={(patch) => onPick(item.id, patch)} />
         <p className="line-clamp-2 text-sm text-muted-foreground">{item.description || 'No description'}</p>
         {rank && <p title={rank.reason} className="line-clamp-2 text-xs text-muted-foreground">rank: {rank.reason}</p>}
         <p className="text-xs text-muted-foreground">

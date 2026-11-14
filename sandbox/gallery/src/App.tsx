@@ -2,11 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
-import { Card, STATUS_STYLE } from './Card'
+import { CatPalette } from './Cats'
+import { CategoryManager } from './Categories'
+import { Card, STATUS_STYLE, type PickPatch } from './Card'
 import { Detail } from './Detail'
 import { Grid } from './Grid'
 import type { StageMode } from './Preview'
-import { fetchState, type Item, type Picks, type PickStatus, type Ranking, type Status, type Weight } from './types'
+import { assigned, fetchState, GROUP_IDS, uncategorized, type Categories, type CatPatch, type GroupId, type Item, type Picks, type Ranking, type Status, type Weight } from './types'
 
 const STATUSES: Status[] = ['unreviewed', 'candidate', 'adopted', 'used', 'rejected', 'deleted']
 const SURFACES = ['app', 'marketing', 'both', 'untagged'] as const
@@ -45,6 +47,8 @@ interface Saved {
   sort: Sort
   minScore: number
   stage: StageMode
+  cat: Record<GroupId, string[]>
+  uncat: boolean
 }
 const loadSaved = (): Partial<Saved> => {
   try {
@@ -54,7 +58,7 @@ const loadSaved = (): Partial<Saved> => {
   }
 }
 
-function Chip({ on, onClick, children, className }: { on: boolean; onClick: () => void; children: ReactNode; className?: string }) {
+function Chip({ on, onClick, children, className, off }: { on: boolean; onClick: () => void; children: ReactNode; className?: string; off?: string }) {
   return (
     <button
       type="button"
@@ -62,7 +66,7 @@ function Chip({ on, onClick, children, className }: { on: boolean; onClick: () =
       onClick={onClick}
       className={cn(
         'rounded-full border px-2.5 py-1 text-xs motion-safe:transition-colors',
-        on ? (className ?? 'border-primary bg-primary text-primary-foreground') : 'text-muted-foreground line-through opacity-70 hover:opacity-100',
+        on ? (className ?? 'border-primary bg-primary text-primary-foreground') : off ?? 'text-muted-foreground line-through opacity-70 hover:opacity-100',
       )}
     >
       {children}
@@ -108,16 +112,21 @@ export default function App() {
   // ?stage=light|dark forces the preview background (the screenshot script uses it)
   const forced = params.get('stage')
   const [stage, setStage] = useState<StageMode>(forced === 'light' || forced === 'dark' ? forced : (saved.stage ?? 'auto'))
+  const [cats, setCats] = useState<Categories>({ groups: [] })
+  // category filters: nothing picked in a group = no filter on it; several picked = any of them
+  const [cat, setCat] = useState<Record<GroupId, Set<string>>>(() => ({ tone: new Set(saved.cat?.tone), roles: new Set(saved.cat?.roles), styles: new Set(saved.cat?.styles) }))
+  const [uncat, setUncat] = useState(!!saved.uncat)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
   const [dark, setDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches)
 
   useEffect(() => {
-    const s: Saved = { q: need ? '' : q, source, family, statuses: [...statuses], surfaces: [...surfaces], weights: [...weights], fetches: [...fetches], sort, minScore, stage }
+    const s: Saved = { q: need ? '' : q, source, family, statuses: [...statuses], surfaces: [...surfaces], weights: [...weights], fetches: [...fetches], sort, minScore, stage, cat: { tone: [...cat.tone], roles: [...cat.roles], styles: [...cat.styles] }, uncat }
     try {
       localStorage.setItem(FILTER_KEY, JSON.stringify(s))
     } catch {
       /* private mode: filters just are not saved */
     }
-  }, [q, need, source, family, statuses, surfaces, weights, fetches, sort, minScore, stage])
+  }, [q, need, source, family, statuses, surfaces, weights, fetches, sort, minScore, stage, cat, uncat])
   const resetFilters = () => {
     setQ('')
     setSource('')
@@ -128,6 +137,8 @@ export default function App() {
     setFetches(new Set(FETCHES))
     setSort('name')
     setMinScore(0)
+    setCat({ tone: new Set(), roles: new Set(), styles: new Set() })
+    setUncat(false)
   }
 
   // #/item/<source>/<key> opens the detail page, #/queue/<source>/<key> the same page inside the review queue.
@@ -137,12 +148,13 @@ export default function App() {
   const wasOpen = useRef(false)
   useEffect(() => {
     const on = () => {
-      if (/^#\/(item|queue)\//.test(location.hash) && !wasOpen.current) scrollY.current = window.scrollY
+      if (/^#\/(item|queue|categories)/.test(location.hash) && !wasOpen.current) scrollY.current = window.scrollY
       setHash(location.hash)
     }
     addEventListener('hashchange', on)
     return () => removeEventListener('hashchange', on)
   }, [])
+  const onCats = hash === '#/categories'
   const inQueue = hash.startsWith('#/queue/')
   const detailId = inQueue ? decodeURIComponent(hash.slice(8)) : hash.startsWith('#/item/') ? decodeURIComponent(hash.slice(7)) : ''
 
@@ -151,8 +163,9 @@ export default function App() {
   }, [dark])
 
   useEffect(() => {
-    Promise.all([fetch('/api/items').then((r) => r.json()), fetch('/api/picks').then((r) => r.json()), fetch('/api/ranking').then((r) => r.json())])
-      .then(([i, p, r]) => {
+    Promise.all([fetch('/api/items').then((r) => r.json()), fetch('/api/picks').then((r) => r.json()), fetch('/api/ranking').then((r) => r.json()), fetch('/api/categories').then((r) => r.json())])
+      .then(([i, p, r, c]) => {
+        setCats(c)
         setItems(i)
         setPicks(p.picks ?? {})
         setRanking(Object.fromEntries((r as { id: string }[]).map((e) => [e.id, e])) as Ranking)
@@ -160,12 +173,16 @@ export default function App() {
       .catch((e) => setLoadError(String(e)))
   }, [])
 
-  const onPick = useCallback((id: string, patch: { status?: PickStatus | null; note?: string }) => {
-    fetch('/api/picks', { method: 'POST', body: JSON.stringify({ id, ...patch }) })
-      .then((r) => r.json())
-      .then((p) => p.picks && setPicks(p.picks))
+  const post = (url: string, body: unknown) => fetch(url, { method: 'POST', body: JSON.stringify(body) }).then((r) => r.json())
+  const onPick = useCallback((id: string, patch: PickPatch) => {
+    post('/api/picks', { id, ...patch }).then((p) => p.picks && setPicks(p.picks))
   }, [])
+  const onBulk = (patch: CatPatch) => post('/api/picks', { ids: [...selected], ...patch }).then((p) => p.picks && setPicks(p.picks))
+  const saveCats = (c: Categories) => post('/api/categories', c).then((d) => d.groups && setCats(d))
+  const select = useCallback((id: string) => setSelected((s) => toggle(s, id)), [])
 
+  // a Tone the user set decides the surface (product UI = app, brand = marketing); otherwise the item's own tag
+  const surfaceOf = (i: Item) => cats.groups.find((g) => g.id === 'tone')?.values.find((v) => v.id === picks[i.id]?.tone)?.surface ?? i.surface ?? 'untagged'
   const statusOf = useCallback((i: Item): Status => picks[i.id]?.status ?? i.status, [picks])
   const rows = useMemo(() => items.map((item) => ({ item, weight: weightOf(item) })), [items])
 
@@ -180,10 +197,12 @@ export default function App() {
     () =>
       rows.filter(({ item }) => {
         const text = `${item.title} ${item.key} ${item.description} ${item.family} ${item.source} ${item.note ?? ''} ${picks[item.id]?.note ?? ''}`.toLowerCase()
-        return (!source || item.source === source) && (!family || item.family === family) && words.every((w) => text.includes(w))
+        const p = picks[item.id]
+        const catOk = GROUP_IDS.every((g) => !cat[g].size || assigned(p, g).some((id) => cat[g].has(id))) && (!uncat || uncategorized(p))
+        return (!source || item.source === source) && (!family || item.family === family) && catOk && words.every((w) => text.includes(w))
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rows, source, family, q, picks],
+    [rows, source, family, q, picks, cat, uncat],
   )
   const visible = useMemo(
     () =>
@@ -191,14 +210,14 @@ export default function App() {
         .filter(
           ({ item, weight }) =>
             statuses.has(statusOf(item)) &&
-            surfaces.has(item.surface ?? 'untagged') &&
+            surfaces.has(surfaceOf(item)) &&
             weights.has(weight) &&
             fetches.has(fetchState(item)) &&
             (ranking[item.id]?.score ?? (minScore > 0 ? -1 : 0)) >= minScore,
         )
         .sort(sorter),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searched, statuses, surfaces, weights, fetches, minScore, sort, ranking, statusOf],
+    [searched, statuses, surfaces, weights, fetches, minScore, sort, ranking, statusOf, cats],
   )
 
   // review queue: a snapshot taken when it opens, so items don't vanish from under the cursor as they are decided
@@ -252,7 +271,7 @@ export default function App() {
 
   const exportPicks = () => {
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(new Blob([JSON.stringify({ picks }, null, 2)], { type: 'application/json' }))
+    a.href = URL.createObjectURL(new Blob([JSON.stringify({ picks, categories: cats }, null, 2)], { type: 'application/json' }))
     a.download = 'picks.json'
     a.click()
     URL.revokeObjectURL(a.href)
@@ -267,6 +286,7 @@ export default function App() {
           status={statusOf(detailRow.item)}
           pick={picks[detailRow.item.id]}
           rank={ranking[detailRow.item.id]}
+          cats={cats}
           onPick={onPick}
           stage={stage}
           index={Math.max(detailIdx, 0)}
@@ -277,7 +297,8 @@ export default function App() {
           onStep={step}
         />
       )}
-      <div className={cn('flex min-h-screen flex-col', detailId && 'hidden')}>
+      {onCats && <CategoryManager cats={cats} picks={picks} onSave={saveCats} onBack={back} />}
+      <div className={cn('flex min-h-screen flex-col', (detailId || onCats) && 'hidden')}>
         <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur">
           <h1 className="text-lg font-semibold">UI gallery</h1>
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title, key, description, notes" aria-label="Search" className="max-w-sm" />
@@ -290,6 +311,9 @@ export default function App() {
           <div className="ml-auto flex flex-wrap gap-2">
             <Button size="sm" onClick={openQueue} disabled={!items.length} title="Step through unreviewed + candidate items, one at a time. A adopt, C candidate, R reject, D delete (needs a note), arrows move.">
               Review queue ({searched.filter(({ item }) => ['unreviewed', 'candidate'].includes(statusOf(item))).length})
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href="#/categories">Categories</a>
             </Button>
             <Button variant="outline" size="sm" onClick={exportPicks}>
               Export picks ({Object.keys(picks).length})
@@ -355,6 +379,38 @@ export default function App() {
                   </Chip>
                 ))}
               </div>
+              {cats.groups.map((g) => (
+                <div key={g.id} className="flex flex-wrap items-center gap-1.5" data-cat-filter={g.id}>
+                  <span className="w-16 text-xs text-muted-foreground">{g.label}</span>
+                  {g.values.map((v) => (
+                    <Chip key={v.id} on={cat[g.id].has(v.id)} onClick={() => setCat({ ...cat, [g.id]: toggle(cat[g.id], v.id) })} off="hover:bg-muted">
+                      {v.label} {count((i) => assigned(picks[i.id], g.id).includes(v.id))}
+                    </Chip>
+                  ))}
+                  {g.id === 'tone' && (
+                    <Chip on={uncat} onClick={() => setUncat(!uncat)} off="hover:bg-muted">
+                      Uncategorized {count((i) => uncategorized(picks[i.id]))}
+                    </Chip>
+                  )}
+                </div>
+              ))}
+              {selected.size > 0 && (
+                <div className="sticky top-[57px] z-10 flex flex-wrap items-center gap-3 rounded-lg border bg-background p-2 shadow-sm" data-bulk>
+                  <span className="text-sm font-medium">{selected.size} selected</span>
+                  <Button size="sm" variant="outline" onClick={() => setSelected(new Set(visible.map(({ item }) => item.id)))}>
+                    Select all {visible.length} shown
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
+                    Clear
+                  </Button>
+                  <details className="w-full text-xs">
+                    <summary className="cursor-pointer">Assign categories to the selection (adds to what they have; Tone replaces)</summary>
+                    <div className="mt-2">
+                      <CatPalette cats={cats} onChange={onBulk} bulk />
+                    </div>
+                  </details>
+                </div>
+              )}
               <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                 <label className="flex items-center gap-1.5">
                   Sort
@@ -384,9 +440,9 @@ export default function App() {
             {loadError && <p className="text-destructive">{loadError}</p>}
             <Grid
               items={visible}
-              hidden={!!detailId}
+              hidden={!!detailId || onCats}
               getKey={({ item }) => item.id}
-              render={({ item, weight }) => <Card item={item} weight={weight} status={statusOf(item)} pick={picks[item.id]} rank={ranking[item.id]} onPick={onPick} stage={stage} />}
+              render={({ item, weight }) => <Card item={item} weight={weight} status={statusOf(item)} pick={picks[item.id]} rank={ranking[item.id]} cats={cats} selected={selected.has(item.id)} onSelect={select} onPick={onPick} stage={stage} />}
             />
             {!visible.length && !loadError && <p className="py-16 text-center text-muted-foreground">Nothing matches these filters.</p>}
           </main>

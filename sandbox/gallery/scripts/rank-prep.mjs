@@ -65,7 +65,9 @@ if (cmd === 'select') {
       neighbours,
     };
   });
-  console.log(JSON.stringify(out, null, 1));
+  // the current category lists, so a suggested tone / roles use ids that exist
+  const taxonomy = Object.fromEntries(json(join(root, 'categories.json'), { groups: [] }).groups.filter((g) => g.id !== 'styles').map((g) => [g.id, g.values.map((v) => `${v.id} = ${v.label}${v.rule ? ' (' + v.rule + ')' : ''}`)]));
+  console.log(JSON.stringify({ taxonomy, items: out }, null, 1));
 } else {
   console.error('usage: rank-prep.mjs select <family|source|all> [--limit N] [--force] | facts <id ...>');
   process.exit(2);

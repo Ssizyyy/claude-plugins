@@ -3,8 +3,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { depList, PickControls, ScoreTag, STATUS_STYLE, type OnPick } from './Card'
+import { CatPalette, Suggestion } from './Cats'
 import { Preview, stageFor, type PreviewState, type Stage, type StageMode } from './Preview'
-import type { Item, Pick, Rank, Status, Weight } from './types'
+import type { Categories, Item, Pick, Rank, Status, Weight } from './types'
 
 const VIEWPORTS = [
   { id: 'mobile', label: 'Mobile 390', width: 390 },
@@ -19,6 +20,7 @@ export function Detail({
   weight,
   pick,
   rank,
+  cats,
   onPick,
   stage: mode,
   index,
@@ -33,6 +35,7 @@ export function Detail({
   weight: Weight
   pick?: Pick
   rank?: Rank
+  cats: Categories
   onPick: OnPick
   stage: StageMode
   index: number
@@ -45,6 +48,7 @@ export function Detail({
   const [vp, setVp] = useState<(typeof VIEWPORTS)[number]['id']>('desktop')
   const [stage, setStage] = useState<Stage>(stageFor(item, mode))
   const [state, setState] = useState<PreviewState>('idle')
+  const tone = cats.groups.find((g) => g.id === 'tone')?.values ?? []
   useEffect(() => setStage(stageFor(item, mode)), [mode, item])
 
   useEffect(() => {
@@ -54,10 +58,15 @@ export function Detail({
       if (e.key === 'ArrowLeft') onStep(-1)
       else if (e.key === 'ArrowRight') onStep(1)
       else if (e.key === 'Escape') onBack()
+      else if (/^[1-9]$/.test(e.key) && tone[Number(e.key) - 1]) {
+        // 1-9 set the Tone (again to clear); status keys A/C/R/D live in PickControls and advance the queue
+        const id = tone[Number(e.key) - 1].id
+        onPick(item.id, { tone: pick?.tone === id ? null : id })
+      }
     }
     addEventListener('keydown', onKey)
     return () => removeEventListener('keydown', onKey)
-  }, [onStep, onBack])
+  }, [onStep, onBack, onPick, item.id, pick?.tone, tone])
 
   const width = VIEWPORTS.find((v) => v.id === vp)!.width
   return (
@@ -88,7 +97,7 @@ export function Detail({
         <Button size="sm" variant="outline" aria-pressed={stage === 'dark'} onClick={() => setStage((s) => (s === 'light' ? 'dark' : 'light'))}>
           Bg: {stage}
         </Button>
-        <span className="ml-auto hidden text-xs text-muted-foreground lg:block">← → switch item · A adopt · C candidate · R reject · D delete (note) · Esc back</span>
+        <span className="ml-auto hidden text-xs text-muted-foreground lg:block">← → switch item · A adopt · C candidate · R reject · D delete (note) · 1-4 tone · Esc back</span>
       </header>
 
       <main className="grid flex-1 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -137,6 +146,8 @@ export function Detail({
             </div>
           )}
           <PickControls item={item} pick={pick} rank={rank} onPick={onPick} shortcuts onDone={onDone} />
+          <Suggestion pick={pick} rank={rank} cats={cats} onApply={(patch) => onPick(item.id, patch)} />
+          <CatPalette pick={pick} cats={cats} onChange={(patch) => onPick(item.id, patch)} />
           <details className="text-xs" open={!!item.fetch.error}>
             <summary className="cursor-pointer text-muted-foreground">Fetch details</summary>
             <pre className="mt-1 overflow-auto whitespace-pre-wrap break-words rounded bg-muted p-2">{JSON.stringify(item.fetch, null, 2)}</pre>

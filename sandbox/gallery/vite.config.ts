@@ -10,7 +10,24 @@ const picksPath = here('./picks.json')
 const statusPath = here('./src/items/_status.json')
 
 const readJson = (p: string, fallback: unknown) => (existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : fallback)
+const categoriesPath = here('./categories.json')
+const GROUPS = ['tone', 'roles', 'styles']
 const PICK_STATUSES = ['adopted', 'candidate', 'rejected', 'deleted']
+
+// Runs fn on a POST body (or with '' on GET) and sends its result as JSON; a throw becomes a 400.
+function readBody(req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse, fn: (body: string) => unknown) {
+  let body = ''
+  const done = () => {
+    try {
+      res.end(JSON.stringify(fn(req.method === 'POST' ? body : '')))
+    } catch (e) {
+      res.statusCode = 400
+      res.end(JSON.stringify({ error: String(e) }))
+    }
+  }
+  if (req.method === 'POST') req.on('data', (c) => (body += c)).on('end', done)
+  else done()
+}
 
 // Dev-only endpoints. The page never touches plugin files: picks go to sandbox/gallery/picks.json.
 function galleryApi(): Plugin {
@@ -29,31 +46,47 @@ function galleryApi(): Plugin {
         res.setHeader('content-type', 'application/json')
         res.end(JSON.stringify(readJson(here('./ranking.json'), [])))
       })
+      // Category definitions (groups tone/roles/styles, each an ordered list of values): the manager screen replaces the whole file.
+      server.middlewares.use('/api/categories', (req, res) => {
+        res.setHeader('content-type', 'application/json')
+        readBody(req, res, (body) => {
+          if (body) {
+            const doc = JSON.parse(body)
+            const ok = Array.isArray(doc.groups) && GROUPS.every((g) => doc.groups.some((x: { id: string; values: unknown[] }) => x.id === g && Array.isArray(x.values)))
+            if (!ok) throw new Error('bad categories')
+            writeFileSync(categoriesPath, JSON.stringify(doc, null, 2) + '\n')
+          }
+          return readJson(categoriesPath, { groups: [] })
+        })
+      })
+      // One pick patch for one id or many (bulk): { id | ids, status?, note?, tone?, roles?, styles?, add?: { roles?, styles? } }.
+      // The file is read inside the handler so concurrent requests cannot overwrite each other.
       server.middlewares.use('/api/picks', (req, res) => {
         res.setHeader('content-type', 'application/json')
-        const file = readJson(picksPath, { picks: {} })
-        if (req.method === 'POST') {
-          let body = ''
-          req.on('data', (c) => (body += c))
-          req.on('end', () => {
-            try {
-              const { id, status, note } = JSON.parse(body)
-              if (typeof id !== 'string' || (status != null && !PICK_STATUSES.includes(status))) throw new Error('bad pick')
-              const next = { ...(file.picks[id] ?? {}) }
-              if (status !== undefined) next.status = status ?? undefined
-              if (note !== undefined) next.note = note || undefined
-              if (next.status === 'deleted') next.reason = next.note ?? 'no reason given'
-              else delete next.reason
-              if (next.status || next.note) file.picks[id] = { ...next, at: new Date().toISOString() }
-              else delete file.picks[id]
-              writeFileSync(picksPath, JSON.stringify(file, null, 2) + '\n')
-              res.end(JSON.stringify(file))
-            } catch (e) {
-              res.statusCode = 400
-              res.end(JSON.stringify({ error: String(e) }))
+        readBody(req, res, (body) => {
+          const file = readJson(picksPath, { picks: {} })
+          if (!body) return file
+          const p = JSON.parse(body)
+          const ids: unknown[] = p.ids ?? [p.id]
+          if (!ids.length || ids.some((i) => typeof i !== 'string') || (p.status != null && !PICK_STATUSES.includes(p.status))) throw new Error('bad pick')
+          for (const id of ids as string[]) {
+            const next = { ...(file.picks[id] ?? {}) }
+            if (p.status !== undefined) next.status = p.status ?? undefined
+            if (p.note !== undefined) next.note = p.note || undefined
+            if (p.tone !== undefined) next.tone = p.tone || undefined
+            for (const g of ['roles', 'styles']) {
+              if (Array.isArray(p[g])) next[g] = p[g]
+              if (Array.isArray(p.add?.[g])) next[g] = [...new Set([...(next[g] ?? []), ...p.add[g]])]
+              if (!next[g]?.length) delete next[g]
             }
-          })
-        } else res.end(JSON.stringify(file))
+            if (next.status === 'deleted') next.reason = next.note ?? 'no reason given'
+            else delete next.reason
+            if (next.status || next.note || next.tone || next.roles || next.styles) file.picks[id] = { ...next, at: new Date().toISOString() }
+            else delete file.picks[id]
+          }
+          writeFileSync(picksPath, JSON.stringify(file, null, 2) + '\n')
+          return file
+        })
       })
     },
   }
