@@ -9,7 +9,7 @@ export const stageFor = (item: { family: string }, mode: StageMode): Stage => (m
 export type PreviewState = 'idle' | 'loading' | 'rendered' | 'blank' | 'error'
 
 // Downloaded sources live in the gitignored src/items/. The glob is empty until `npm run gallery:fetch` has run.
-const loaders = import.meta.glob('./items/*/*/*.{tsx,jsx}') as Record<string, () => Promise<Record<string, unknown>>>
+const loaders = import.meta.glob('./items/*/*/**/*.{tsx,jsx}') as Record<string, () => Promise<Record<string, unknown>>>
 
 // Props (and string children) a component needs to show anything; see README.
 const demo = demoProps as unknown as Record<string, Record<string, unknown> & { _children?: string | string[]; _text?: string }>
@@ -185,7 +185,7 @@ export function Preview({
     >
       {error ? (
         <div className="max-h-full w-full overflow-auto p-3 text-xs">
-          <span className="rounded bg-destructive/15 px-1.5 py-0.5 font-medium text-destructive">won't render</span>
+          <span className="rounded bg-destructive/15 px-1.5 py-0.5 font-medium text-destructive">{error.startsWith('not fetched') ? 'not fetched' : "won't render"}</span>
           <p className="mt-2 break-words font-mono text-muted-foreground">{error}</p>
         </div>
       ) : (

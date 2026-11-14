@@ -4,20 +4,52 @@
     {
       "name": "sandbox",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "sandbox", "--", "--port", "5173", "--strictPort"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "sandbox",
+        "--",
+        "--port",
+        "5173",
+        "--strictPort"
+      ],
       "port": 5173
     },
     {
       "name": "trial-judge",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["scripts/skill-trial.mjs", "serve", "4700"],
+      "runtimeArgs": [
+        "scripts/skill-trial.mjs",
+        "serve",
+        "4700"
+      ],
       "port": 4700
     },
     {
       "name": "gallery",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "gallery", "--prefix", "sandbox/gallery"],
+      "runtimeArgs": [
+        "run",
+        "gallery",
+        "--prefix",
+        "sandbox/gallery"
+      ],
       "port": 5174
+    },
+    {
+      "name": "gallery-alt",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "gallery",
+        "--prefix",
+        "sandbox/gallery",
+        "--",
+        "--port",
+        "5191"
+      ],
+      "port": 5191
     }
   ]
 }

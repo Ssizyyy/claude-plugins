@@ -18,14 +18,16 @@ function galleryApi(): Plugin {
     name: 'gallery-api',
     configureServer(server) {
       server.middlewares.use('/api/items', (_req, res) => {
-        const proof = readJson(here('./proof-set.json'), { ids: [], extras: [] })
         const catalog: { id: string }[] = readJson(catalogPath, { items: [] }).items
         const status = readJson(statusPath, {})
-        const items = [...proof.ids.map((id: string) => catalog.find((c) => c.id === id)), ...proof.extras]
-          .filter(Boolean)
-          .map((it) => ({ ...it, fetch: status[it.id] ?? { error: 'not fetched: run npm run gallery:fetch' } }))
+        const items = catalog.map((it) => ({ ...it, fetch: status[it.id] ?? { error: 'not fetched: run npm run gallery:fetch' } }))
         res.setHeader('content-type', 'application/json')
         res.end(JSON.stringify(items))
+      })
+      // /gallery-rank output: an array of { id, score, scores, reason, blank }
+      server.middlewares.use('/api/ranking', (_req, res) => {
+        res.setHeader('content-type', 'application/json')
+        res.end(JSON.stringify(readJson(here('./ranking.json'), [])))
       })
       server.middlewares.use('/api/picks', (req, res) => {
         res.setHeader('content-type', 'application/json')
@@ -59,7 +61,8 @@ function galleryApi(): Plugin {
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), galleryApi()],
-  resolve: { alias: { '@': here('./src') } },
+  // next/* and @repo/shadcn: stand-ins for items copied out of Next or monorepo apps
+  resolve: { alias: { '@': here('./src'), 'next/image': here('./src/shims/next-image.tsx'), 'next/link': here('./src/shims/next-link.tsx'), '@repo/shadcn': here('./src/shims/repo-shadcn.ts') } },
   // third-party previews that fail to compile must not cover the gallery with an overlay
   // Items are found by glob, not imported statically, so Vite would discover their packages one by one at runtime and
   // reload the page each time, leaving previews stuck on "loading". Scan the items up front and pre-bundle the heavy ones.
