@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/geist";
+/* the sandbox design tokens, shared as-is */
+@import "../../src/polished/theme.css";
+@import "../../src/polished/polished.css";
+
+/* downloaded items are gitignored, so Tailwind needs to be told to scan them */
+@source "./items";
+
+/* the page can be dark while a preview stage is light, and the other way round */
+@custom-variant dark (&:is(.dark *):not(.stage-light *));
+
+@theme {
+  --font-sans: "Geist Variable", sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    @apply bg-background font-sans text-foreground;
+  }
+}

@@ -12,6 +12,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["scripts/skill-trial.mjs", "serve", "4700"],
       "port": 4700
+    },
+    {
+      "name": "gallery",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "gallery", "--prefix", "sandbox/gallery"],
+      "port": 5174
     }
   ]
 }

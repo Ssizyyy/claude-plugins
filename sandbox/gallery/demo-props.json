@@ -1,0 +1,90 @@
+{
+ "_readme": "Props for items that show nothing without them, keyed by catalog id. `_children` (string or array of strings) becomes simple <div> children.",
+ "react-bits/CountUp": {
+  "to": 1280
+ },
+ "react-bits/RotatingText": {
+  "texts": [
+   "Ship it",
+   "Polish it",
+   "Test it"
+  ]
+ },
+ "react-bits/LogoLoop": {
+  "logos": [
+   {
+    "node": "Acme"
+   },
+   {
+    "node": "Globex"
+   },
+   {
+    "node": "Initech"
+   },
+   {
+    "node": "Umbrella"
+   },
+   {
+    "node": "Hooli"
+   }
+  ]
+ },
+ "react-bits/RubberSegment": {
+  "items": [
+   {
+    "value": "day",
+    "label": "Day"
+   },
+   {
+    "value": "week",
+    "label": "Week"
+   },
+   {
+    "value": "month",
+    "label": "Month"
+   }
+  ]
+ },
+ "react-bits/AnimatedContent": {
+  "_children": "Animated content"
+ },
+ "react-bits/FadeContent": {
+  "_children": "Fade content"
+ },
+ "react-bits/ElectricBorder": {
+  "_children": "Electric border"
+ },
+ "react-bits/GlassSurface": {
+  "_children": "Glass surface"
+ },
+ "react-bits/SpotlightCard": {
+  "_children": "Spotlight card"
+ },
+ "react-bits/Magnet": {
+  "_children": "Magnet"
+ },
+ "react-bits/BlurText": {
+  "text": "Blur text reveal"
+ },
+ "react-bits/SplitText": {
+  "text": "Split text"
+ },
+ "react-bits/Shuffle": {
+  "text": "Shuffle"
+ },
+ "react-bits/ShinyText": {
+  "_text": "Shiny text"
+ },
+ "react-bits/GradientText": {
+  "_text": "Gradient text"
+ },
+ "react-bits/ScrollReveal": {
+  "_text": "Words reveal as you scroll"
+ },
+ "react-bits/ScrollVelocity": {
+  "texts": [
+   "Scroll velocity",
+   "Keep moving"
+  ]
+ }
+}
