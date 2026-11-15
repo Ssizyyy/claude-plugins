@@ -2,6 +2,10 @@
 
 Installs only pick up a release when `version` in `.claude-plugin/plugin.json` changes.
 
+## 2.5.0 (2026-11-15)
+
+- `ui-component-catalog` gains notes on three more shadcn registries: Kokonut UI (AI/agent UI), Cult UI (app overlays, form controls) and SmoothUI (`motion`-only items, 35 blocks). All MIT. The notes record install commands, deps, Safe vs Free fit, standouts and overlap. The components are not indexed in `components.json` and no upstream source is bundled. Research behind it: `research/ui-sources-2026-11.md`.
+
 ## 2.4.0 (2026-11-12)
 
 - New invoke-only skill `modern-web-guidance` (Google Chrome, Edge, Firefox and MDN teams; Apache-2.0), bundled at upstream commit `4dd968349e54`. Step 3 of `design-pass` now consults it before fixing dialogs, popovers, selects, form fields, tables, tooltips, focus and validation. It is a reference only: the shadcn component stays, the guide shapes CSS, accessibility and fallbacks.
