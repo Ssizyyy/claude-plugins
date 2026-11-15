@@ -85,7 +85,7 @@ export function PickControls({
     const keys: Record<string, PickStatus> = { a: 'adopted', c: 'candidate', r: 'rejected', d: 'deleted' }
     const onKey = (e: KeyboardEvent) => {
       const t = e.target
-      if ((t instanceof Element && t.closest('input, textarea, select, [contenteditable]')) || e.metaKey || e.ctrlKey || e.altKey) return
+      if ((t instanceof Element && t.closest('input, textarea, select, [contenteditable], [role="dialog"]')) || e.metaKey || e.ctrlKey || e.altKey) return
       const s = keys[e.key.toLowerCase()]
       if (s) {
         e.preventDefault()
