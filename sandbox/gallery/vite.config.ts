@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
+import { runsApi } from './runs-api.mjs'
 import { backupCount, dataDir, lastMigration, migrate, picksFile, rankingFile, readJson as readData, writeData } from './data.mjs'
 
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url))
@@ -99,7 +100,7 @@ function galleryApi(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), galleryApi()],
+  plugins: [react(), tailwindcss(), galleryApi(), runsApi()],
   // next/* and @repo/shadcn: stand-ins for items copied out of Next or monorepo apps
   resolve: { alias: { '@': here('./src'), 'next/image': here('./src/shims/next-image.tsx'), 'next/link': here('./src/shims/next-link.tsx'), '@repo/shadcn': here('./src/shims/repo-shadcn.ts') } },
   // third-party previews that fail to compile must not cover the gallery with an overlay

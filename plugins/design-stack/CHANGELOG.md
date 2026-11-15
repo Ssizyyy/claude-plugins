@@ -2,6 +2,11 @@
 
 Installs only pick up a release when `version` in `.claude-plugin/plugin.json` changes.
 
+## 2.7.0 (2026-11-15)
+
+- New optional "Choose components" step in `design-pass` (Safe and Free). Step 0 asks once, "Pick components in the gallery?"; no changes nothing. Yes: `design-pass/scripts/shortlist.mjs` (Node only, no dependencies) turns the screens' needs into a shortlist from the catalog and your gallery data: one default and up to four alternatives per need, plus up to six extras. It drops rejected, deleted and showpiece items, hides items that add a package in Safe mode, and reuses shared choices from earlier runs of the same project. You pick in the gallery (`#/select/<run-id>`); design-pass reads the result, marks used items `used` and reports each package added. Without the gallery it falls back to a numbered chat list.
+- `node --test scripts/shortlist.test.mjs` runs build, resolve and used on the real catalog.
+
 ## 2.6.0 (2026-11-15)
 
 - Mode is chosen by the skill you start, not by a question. `design-pass` is Safe (no new packages, no motion). New `design-pass-free` is Free (no dependency lock, heavy effects allowed, control motion included). It is model-invocable for premium-look requests ("I want a premium looking app") and counts such a request as the yes to Free and motion. The shared procedure moved to `design-pass/references/core.md`.
