@@ -7,6 +7,7 @@
 
 /* downloaded items are gitignored, so Tailwind needs to be told to scan them */
 @source "./items";
+@source "./work"; /* working copies of variants, also gitignored */
 
 /* the page can be dark while a preview stage is light, and the other way round */
 @custom-variant dark (&:is(.dark *):not(.stage-light *));

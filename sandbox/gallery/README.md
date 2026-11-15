@@ -57,6 +57,7 @@ Applying picks to `curated.json`, refreshing and releasing is a separate step.
 - `src/items/`: downloaded third-party source and `_status.json`. The repo is public and React Bits is MIT + Commons Clause, so its source must never be committed.
 - `.fetch-cache/`: cached registry JSON (the same third-party source).
 - `.rank-shots/`, `.rank-batches/`: ranking screenshots and scratch batches.
+- `src/work/`: working copies of variants (modified third-party source, see Variants).
 - `node_modules/`, `dist/`.
 
 ## Where your data lives
@@ -66,6 +67,8 @@ Picks (status, notes, categories) and the `/gallery-rank` scores are the work yo
 | File | What |
 |---|---|
 | ~/.claude/ui-gallery/picks.json | picks and category assignments (under your user profile on Windows) |
+| ~/.claude/ui-gallery/variants/ | your saved variants (`<source>/<key>/<name>/`), see Variants |
+| ~/.claude/ui-gallery/settings.json | the remembered export target project and the last few used |
 | `~/.claude/ui-gallery/ranking.json` | `/gallery-rank` scores and suggestions (they cost tokens to regenerate) |
 | `~/.claude/ui-gallery/backups/` | the last 20 timestamped copies of each file, at most one a minute |
 
@@ -84,3 +87,32 @@ Picks (status, notes, categories) and the `/gallery-rank` scores are the work yo
 - Assign by chip on the detail page, by key in the detail page and review queue (**1-9** set the Tone, press again to clear; A/C/R/D still set the status and advance), or in bulk: tick cards in the grid, then use the bar that appears.
 - Filter by any value (several in one group = any of them), or by **Uncategorized** (no Tone and no Role). Counts show per value; filters are saved in localStorage. Export picks includes the category lists.
 - `/gallery-rank` also writes `suggested: { tone, roles[], reason }` into the shared `ranking.json`. It shows as a dashed "Suggested" chip with one-click accept, offered only for what the user hasn't assigned.
+
+## Variants (local component editor)
+
+On a detail page you can tweak an item and keep the result as a named **variant**. The original in `src/items/` is never written; **Edit a copy** (or the first token change) starts a **Draft**, a working copy.
+
+- **Theme tokens**: colours (background, foreground, primary, accent, muted, border, destructive), radius, base spacing, scale and font, with six presets (they follow the light/dark stage) and a reset. They are CSS variables on the preview stage, so items written with shadcn-style classes (`bg-primary`, `rounded-lg`, `p-4`) follow them; items with hard-coded colours only follow background and font.
+- **Code**: a CodeMirror 6 panel (the gallery's own dependency) edits every source file of the copy. Edits are written through the dev server after 350 ms and Vite HMR reloads the preview. Esc, then Tab leaves the editor.
+- **Describe the change**: a text box that builds a prompt with the copy's file paths, your instruction and the repo rules. **Copy prompt** puts it on the clipboard; the page never launches Claude or any CLI.
+- **Save**: *Save as variant…* names it (letters, digits, `. _ -`). Saved variants can be renamed, duplicated and deleted (deleted ones move to `variants/.trash/`, nothing is erased) and can change in place (*Save changes* / *Discard changes*).
+- **Compare**: the variants row switches the preview between Original, the Draft and each variant (key **V** cycles). *Compare with* shows two side by side, each with its own tokens. *Diff vs original* shows the token overrides and a line diff per changed file.
+- **Picks**: a variant has its own adopt / candidate / reject, note and categories, stored in `picks.json` under `<source>/<key>#<variant>`. **Mark for design-pass** sets `preferredVariant` on the item's pick (design-pass reads it in a later change).
+
+### Where variants live
+
+`<data dir>/variants/<source>/<key>/<name>/` holds `files/` (the full file tree of the item, edited), `tokens.json` and `meta.json` (parent id, created, updated, note, entry). Never in the repo, so a clean worktree keeps them. Vite cannot resolve npm packages for files outside the project root, so rendering uses a gitignored working copy at `src/work/<source>/<key>/<slot>/` (`_draft` or the variant name). It is imported by URL (`/src/work/...`), which gives HMR and finds files created while the server runs. *Save* copies the working copy into the data dir; opening a variant on a fresh checkout copies it back. `src/work/` is a scratch folder you can delete: unsaved drafts go with it.
+
+### Exports (on a saved variant)
+
+- **Copy into a project…**: enter a project folder (remembered in `settings.json`, with the last few). If it has a `components.json`, the files go to `<aliases.components>/<key>-<variant>/` (aliases resolved through `tsconfig.json` / `jsconfig.json` `paths`, else `src/`); otherwise you type a destination. The dialog lists each file as new, identical or *exists, differs*. For differing files it shows a diff and a per-file **Overwrite** checkbox; the server refuses to overwrite a file that is not ticked. It never runs npm: it shows the install command (npm, pnpm, yarn or bun by the project's lockfile) with a copy button, the `npx shadcn@latest add` line for shadcn components the files import, and a minimal usage snippet. Token overrides become a `tokens.css` next to the files.
+- **Copy install prompt**: a prompt for Claude to install the variant into a project: variant folder, tokens as CSS, deps, usage, and the "diff and ask before overwriting" rule.
+- **Mark for design-pass**: see Picks above.
+
+### Licence
+
+React Bits is MIT + Commons Clause, so modified third-party source must stay out of this public repo. Variants and working copies live outside git (`<data dir>/variants/`, gitignored `src/work/`), and the prompts say so. Before committing anything, `git status` must show no `src/items/`, `src/work/` or variant files. Copying a variant into your own project is a separate decision under each item's licence.
+
+![Compare, light](screenshots/variants-compare-light.jpg)
+![Compare, dark](screenshots/variants-compare-dark.jpg)
+![Code editor, light](screenshots/variants-editor-light.jpg)

@@ -25,6 +25,7 @@ export interface Pick {
   tone?: string
   roles?: string[]
   styles?: string[]
+  preferredVariant?: string // on an item: the variant design-pass should use
   at?: string
 }
 export type Picks = Record<string, Pick>
