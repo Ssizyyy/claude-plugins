@@ -44,7 +44,7 @@ Rendering is a gallery, not a faithful install: items that need props to show an
 
 ## Picks
 
-Each card has **Adopt / Candidate / Reject / Delete** and a note. The Vite dev server writes them to `picks.json` (the page never touches plugin files). Clicking the active button clears it. **Delete** is a permanent tombstone (`status: "deleted"` plus `reason`, taken from the note, which is required): `gallery:fetch` skips tombstoned items and removes their downloaded folder. Deleted items are hidden by default (status chip). **Export picks** downloads the same JSON.
+Each card has **Adopt / Candidate / Reject / Delete** and a note. The Vite dev server writes them to the shared data dir (below), never into the repo or the plugin files. Clicking the active button clears it. **Delete** is a permanent tombstone (`status: "deleted"` plus `reason`, taken from the note, which is required): `gallery:fetch` skips tombstoned items and removes their downloaded folder. Deleted items are hidden by default (status chip). **Export picks** downloads the same JSON.
 
 Applying picks to `curated.json`, refreshing and releasing is a separate step.
 
@@ -59,14 +59,28 @@ Applying picks to `curated.json`, refreshing and releasing is a separate step.
 - `.rank-shots/`, `.rank-batches/`: ranking screenshots and scratch batches.
 - `node_modules/`, `dist/`.
 
-`picks.json` and `ranking.json` are committed on purpose (your review and the hint output).
+## Where your data lives
+
+Picks (status, notes, categories) and the `/gallery-rank` scores are the work you can't cheaply redo, so they live outside any worktree:
+
+| File | What |
+|---|---|
+| ~/.claude/ui-gallery/picks.json | picks and category assignments (under your user profile on Windows) |
+| `~/.claude/ui-gallery/ranking.json` | `/gallery-rank` scores and suggestions (they cost tokens to regenerate) |
+| `~/.claude/ui-gallery/backups/` | the last 20 timestamped copies of each file, at most one a minute |
+
+- Override the folder with the env var `UI_GALLERY_DATA_DIR`. The gallery shows the path next to the saved-filters note. Export picks still downloads a copy.
+- Writes go to a temp file and are renamed into place, so a crash can't leave a half-written file.
+- One-time import: on start, the old in-repo `picks.json` and the committed `ranking.json` are imported if the shared files are missing or lack their ids. Where both have the same pick, the newer `at` wins; the gallery says what happened until you dismiss it. Each old file is imported once (its hash goes in `migrated.json`), so a pick you later remove is not brought back.
+- `picks.json` in the repo is gitignored and no longer tracked. The committed `ranking.json` stays as the seed from the proof run; the live one is the shared file.
+- Committed definitions stay in the repo: `categories.json`, `demo-props.json`.
 
 ## Categories
 
 `categories.json` (committed) holds three groups the user edits on the **Categories** screen (`#/categories`): **Tone** (one per item), **Role** and **Style** (several, style may stay empty). Each value has a stable `id`, a `label` and its place in the list is its order. A Tone value may carry `surface` (`app` or `marketing`, which overrides the item's own surface tag in the Surface filter) and a `rule` (Showpiece / silly: never in Safe mode, Free mode only on request).
 
-- Assignments live in `picks.json` next to status: `tone`, `roles[]`, `styles[]`. The ranking never writes them.
+- Assignments live in the shared `picks.json` next to status: `tone`, `roles[]`, `styles[]`. The ranking never writes them.
 - Removing a value that items still use asks first. Those items keep the id and show it flagged "removed" until unassigned.
 - Assign by chip on the detail page, by key in the detail page and review queue (**1-9** set the Tone, press again to clear; A/C/R/D still set the status and advance), or in bulk: tick cards in the grid, then use the bar that appears.
 - Filter by any value (several in one group = any of them), or by **Uncategorized** (no Tone and no Role). Counts show per value; filters are saved in localStorage. Export picks includes the category lists.
-- `/gallery-rank` also writes `suggested: { tone, roles[], reason }` into `ranking.json`. It shows as a dashed "Suggested" chip with one-click accept, offered only for what the user hasn't assigned.
+- `/gallery-rank` also writes `suggested: { tone, roles[], reason }` into the shared `ranking.json`. It shows as a dashed "Suggested" chip with one-click accept, offered only for what the user hasn't assigned.

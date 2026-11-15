@@ -7,3 +7,5 @@ src/items/
 .fetch-cache/
 .rank-shots/
 .rank-batches/
+
+picks.json

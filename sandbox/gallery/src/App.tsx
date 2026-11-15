@@ -28,6 +28,11 @@ function weightOf(item: Item): Weight {
   return deps.every((d) => BASIC.has(d)) ? 'basic' : 'extra'
 }
 
+// /api/data: where the user's picks live and what the one-time import of the old in-repo files did
+interface Step { from: string; imported: number; newer: number; kept: number; hadShared: boolean }
+interface DataInfo { dir: string; picks: string; backups: number; migration: { picks?: Step; ranking?: Step } }
+const SEEN_KEY = 'gallery:migration-seen'
+
 const toggle = <T,>(set: Set<T>, v: T) => {
   const n = new Set(set)
   if (!n.delete(v)) n.add(v)
@@ -116,6 +121,8 @@ export default function App() {
   // category filters: nothing picked in a group = no filter on it; several picked = any of them
   const [cat, setCat] = useState<Record<GroupId, Set<string>>>(() => ({ tone: new Set(saved.cat?.tone), roles: new Set(saved.cat?.roles), styles: new Set(saved.cat?.styles) }))
   const [uncat, setUncat] = useState(!!saved.uncat)
+  const [data, setData] = useState<DataInfo>()
+  const [seen, setSeen] = useState(() => { try { return localStorage.getItem(SEEN_KEY) } catch { return null } })
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [dark, setDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches)
 
@@ -166,6 +173,7 @@ export default function App() {
     Promise.all([fetch('/api/items').then((r) => r.json()), fetch('/api/picks').then((r) => r.json()), fetch('/api/ranking').then((r) => r.json()), fetch('/api/categories').then((r) => r.json())])
       .then(([i, p, r, c]) => {
         setCats(c)
+        fetch('/api/data').then((r) => r.json()).then(setData)
         setItems(i)
         setPicks(p.picks ?? {})
         setRanking(Object.fromEntries((r as { id: string }[]).map((e) => [e.id, e])) as Ranking)
@@ -269,6 +277,11 @@ export default function App() {
   const failed = items.filter((i) => fetchState(i) === 'failed').length
   const ranked = Object.keys(ranking).length
 
+  // one-time import of the old in-repo picks.json / ranking.json: say what happened until dismissed
+  const m = data?.migration
+  const noteKey = m ? JSON.stringify(m) : ''
+  const note = (m?.picks || m?.ranking) && seen !== noteKey ? [m.picks && `Imported ${m.picks.imported} pick(s) from the old in-repo picks.json${m.picks.hadShared ? `, merged by item id with the newer entry winning (${m.picks.newer} replaced yours, ${m.picks.kept} of yours kept)` : ''}.`, m.ranking && `Imported ${m.ranking.imported} ranking entr${m.ranking.imported === 1 ? 'y' : 'ies'}.`].filter(Boolean).join(' ') : ''
+  const dismiss = () => { setSeen(noteKey); try { localStorage.setItem(SEEN_KEY, noteKey) } catch { /* not saved */ } }
   const exportPicks = () => {
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob([JSON.stringify({ picks, categories: cats }, null, 2)], { type: 'application/json' }))
@@ -299,6 +312,14 @@ export default function App() {
       )}
       {onCats && <CategoryManager cats={cats} picks={picks} onSave={saveCats} onBack={back} />}
       <div className={cn('flex min-h-screen flex-col', (detailId || onCats) && 'hidden')}>
+        {note && (
+          <p className="flex items-center gap-3 border-b bg-accent px-4 py-2 text-sm text-accent-foreground" data-migration>
+            {note}
+            <button type="button" className="ml-auto underline" onClick={dismiss}>
+              Dismiss
+            </button>
+          </p>
+        )}
         <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur">
           <h1 className="text-lg font-semibold">UI gallery</h1>
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search title, key, description, notes" aria-label="Search" className="max-w-sm" />
@@ -435,6 +456,11 @@ export default function App() {
                   Reset filters
                 </button>
                 <span>Filters are saved in this browser.</span>
+                {data && (
+                  <span data-data-path title={`Picks and rankings are stored here, outside the repo (${data.backups} backup file(s) in backups/). Override with UI_GALLERY_DATA_DIR.`}>
+                    Picks: <code>{data.picks}</code>
+                  </span>
+                )}
               </div>
             </div>
             {loadError && <p className="text-destructive">{loadError}</p>}

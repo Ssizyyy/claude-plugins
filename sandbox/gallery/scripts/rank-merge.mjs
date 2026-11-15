@@ -3,13 +3,15 @@
 // Each batch file is a JSON array of { id, scores: { appFit, a11y, depCost, polish, unique }, reason, blank }.
 // score is computed here as the mean of the five scores (1 decimal); a blank render caps it at 2. Entries replace
 // older ones with the same id. Invalid entries are reported and skipped.
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
+import { migrate, rankingFile, readJson, writeData } from '../data.mjs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const file = join(root, 'ranking.json');
-const byId = new Map((existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : []).map((r) => [r.id, r]));
+migrate();
+const file = rankingFile; // the shared data dir (data.mjs), not the repo
+const byId = new Map(readJson(file, []).map((r) => [r.id, r]));
 const KEYS = ['appFit', 'a11y', 'depCost', 'polish', 'unique'];
 const cats = JSON.parse(readFileSync(join(root, 'categories.json'), 'utf8')).groups;
 const known = (g) => new Set(cats.find((x) => x.id === g).values.map((v) => v.id));
@@ -47,5 +49,5 @@ for (const f of process.argv.slice(2)) {
     added++;
   }
 }
-writeFileSync(file, JSON.stringify([...byId.values()].sort((a, b) => a.id.localeCompare(b.id)), null, 1) + '\n');
+writeData(file, [...byId.values()].sort((a, b) => a.id.localeCompare(b.id)));
 console.log(`merged ${added} entries, ranking.json now has ${byId.size}`);

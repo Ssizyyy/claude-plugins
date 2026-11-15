@@ -12,6 +12,7 @@
 // removed. Third-party source never leaves src/items/.
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { migrate, picksFile, readJson } from '../data.mjs';
 import { basename, dirname, extname, join, posix } from 'node:path';
 import { builtinModules } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -31,7 +32,8 @@ const DELAY_MS = 150; // pause each worker between requests
 const PROOF = new Set([ "uselayouts/3d-book", "uselayouts/accessible-action", "uselayouts/analog-stick", "uselayouts/bucket", "uselayouts/coverflow-drag", "uselayouts/dynamic-grid-gallery", "uselayouts/editorial-deck", "uselayouts/feature-carousel", "uselayouts/fluid-expanding-grid", "uselayouts/focus-testimonials", "uselayouts/folder-interaction", "uselayouts/get-in-touch", "uselayouts/liquid-index", "uselayouts/overlapping-slider", "uselayouts/perspective-text-scroll", "uselayouts/photo-albums", "uselayouts/polaroid-drag", "uselayouts/polaroid-stack", "uselayouts/pop-tilt-cards", "uselayouts/pricing-card", "uselayouts/rolling-card-stack", "uselayouts/shake-testimonial-card", "uselayouts/slide-subscribe", "uselayouts/stacked-outline-text", "uselayouts/wheel-carousel", "react-bits/AnimatedContent", "react-bits/ElectricBorder", "react-bits/FadeContent", "react-bits/GlareHover", "react-bits/GradualBlur", "react-bits/LogoLoop", "react-bits/Magnet", "react-bits/Noise", "react-bits/StarBorder", "react-bits/BlurText", "react-bits/CountUp", "react-bits/GradientText", "react-bits/RotatingText", "react-bits/ScrollReveal", "react-bits/ScrollVelocity", "react-bits/ShinyText", "react-bits/SplitText", "react-bits/TextType", "react-bits/TrueFocus", "react-bits/Shuffle", "react-bits/AnimatedList", "react-bits/CardSwap", "react-bits/Counter", "react-bits/Dock", "react-bits/GlassSurface", "react-bits/GooeyNav", "react-bits/Masonry", "react-bits/PillNav", "react-bits/ScrollStack", "react-bits/SpotlightCard", "react-bits/ScrollExpand", "react-bits/Stack", "react-bits/TiltedCard", "react-bits/Aurora", "react-bits/DarkVeil", "react-bits/Dither", "react-bits/DotGrid", "react-bits/GradientBlinds", "react-bits/Grainient", "react-bits/GridScan", "react-bits/Iridescence", "react-bits/LightRays", "react-bits/LineWaves", "react-bits/SoftAurora", "react-bits/Particles", "react-bits/PixelBlast", "react-bits/Plasma", "react-bits/Silk", "react-bits/Threads", "react-bits/Waves", "react-bits/FloatingLines", "react-bits/SquishSwitch", "react-bits/HoldButton", "react-bits/RubberSegment", "react-bits/JellyRadio", "react-bits/StatusMark", "react-bits/BlobCursor" ]);
 
 const catalog = JSON.parse(readFileSync(catalogPath, 'utf8')).items;
-const picks = existsSync(join(root, 'picks.json')) ? JSON.parse(readFileSync(join(root, 'picks.json'), 'utf8')).picks ?? {} : {};
+migrate(); // picks live in the shared data dir (data.mjs); the first run imports any old in-repo file
+const picks = readJson(picksFile, { picks: {} }).picks ?? {};
 const items = flag('--all') || only.length ? catalog : catalog.filter((c) => PROOF.has(c.id));
 
 const BASES = { uselayouts: 'https://uselayouts.com/r/' };

@@ -3,10 +3,10 @@ import { fileURLToPath, URL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
+import { backupCount, dataDir, lastMigration, migrate, picksFile, rankingFile, readJson as readData, writeData } from './data.mjs'
 
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 const catalogPath = here('../../plugins/design-stack/skills/ui-component-catalog/catalog/components.json')
-const picksPath = here('./picks.json')
 const statusPath = here('./src/items/_status.json')
 
 const readJson = (p: string, fallback: unknown) => (existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : fallback)
@@ -29,11 +29,12 @@ function readBody(req: import('node:http').IncomingMessage, res: import('node:ht
   else done()
 }
 
-// Dev-only endpoints. The page never touches plugin files: picks go to sandbox/gallery/picks.json.
+// Dev-only endpoints. The page never touches plugin files: picks go to the shared data dir (data.mjs), never into the repo.
 function galleryApi(): Plugin {
   return {
     name: 'gallery-api',
     configureServer(server) {
+      migrate()
       server.middlewares.use('/api/items', (_req, res) => {
         const catalog: { id: string }[] = readJson(catalogPath, { items: [] }).items
         const status = readJson(statusPath, {})
@@ -44,7 +45,12 @@ function galleryApi(): Plugin {
       // /gallery-rank output: an array of { id, score, scores, reason, blank }
       server.middlewares.use('/api/ranking', (_req, res) => {
         res.setHeader('content-type', 'application/json')
-        res.end(JSON.stringify(readJson(here('./ranking.json'), [])))
+        res.end(JSON.stringify(readData(rankingFile, [])))
+      })
+      // Where the user's picks live, and what the one-time import of the old in-repo files did at startup.
+      server.middlewares.use('/api/data', (_req, res) => {
+        res.setHeader('content-type', 'application/json')
+        res.end(JSON.stringify({ dir: dataDir, picks: picksFile, backups: backupCount(), migration: lastMigration() }))
       })
       // Category definitions (groups tone/roles/styles, each an ordered list of values): the manager screen replaces the whole file.
       server.middlewares.use('/api/categories', (req, res) => {
@@ -64,7 +70,7 @@ function galleryApi(): Plugin {
       server.middlewares.use('/api/picks', (req, res) => {
         res.setHeader('content-type', 'application/json')
         readBody(req, res, (body) => {
-          const file = readJson(picksPath, { picks: {} })
+          const file = readData<{ picks: Record<string, any> }>(picksFile, { picks: {} })
           if (!body) return file
           const p = JSON.parse(body)
           const ids: unknown[] = p.ids ?? [p.id]
@@ -84,7 +90,7 @@ function galleryApi(): Plugin {
             if (next.status || next.note || next.tone || next.roles || next.styles) file.picks[id] = { ...next, at: new Date().toISOString() }
             else delete file.picks[id]
           }
-          writeFileSync(picksPath, JSON.stringify(file, null, 2) + '\n')
+          writeData(picksFile, file)
           return file
         })
       })

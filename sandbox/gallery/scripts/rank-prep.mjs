@@ -5,6 +5,7 @@
 // unreviewed/candidate first. facts: what can be read off the source without a model (deps, size, reduced-motion and
 // ARIA hits, same-family neighbours for the uniqueness call).
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { migrate, picksFile, rankingFile } from '../data.mjs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -12,8 +13,9 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const json = (p, d) => (existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : d);
 const catalog = json(join(root, '../../plugins/design-stack/skills/ui-component-catalog/catalog/components.json'), { items: [] }).items;
 const status = json(join(root, 'src/items/_status.json'), {});
-const picks = json(join(root, 'picks.json'), { picks: {} }).picks;
-const ranking = json(join(root, 'ranking.json'), []);
+migrate();
+const picks = json(picksFile, { picks: {} }).picks;
+const ranking = json(rankingFile, []);
 const ranked = new Set(ranking.map((r) => r.id));
 const [cmd, ...rest] = process.argv.slice(2);
 const flag = (f) => rest.includes(f);

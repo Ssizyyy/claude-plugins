@@ -41,4 +41,4 @@ Score honestly across the range; if everything lands on 4, the hint is useless. 
 
 ## Gallery side
 
-`ranking.json` is read by the gallery: score and reason show on cards and the detail page, the grid sorts by it ("ranking") and filters by "Min score", and the detail page offers **Accept hint** (score 4 or more: Candidate; 2.5 or less or blank: Reject; in between: no hint). Accepting writes a normal pick, which the user can change. A suggested tone and roles show as a dashed chip with an accept button (only for what the user hasn't assigned yet).
+`ranking.json` (in the shared data dir, see the README) is read by the gallery: score and reason show on cards and the detail page, the grid sorts by it ("ranking") and filters by "Min score", and the detail page offers **Accept hint** (score 4 or more: Candidate; 2.5 or less or blank: Reject; in between: no hint). Accepting writes a normal pick, which the user can change. A suggested tone and roles show as a dashed chip with an accept button (only for what the user hasn't assigned yet).
