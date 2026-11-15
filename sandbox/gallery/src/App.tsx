@@ -298,6 +298,7 @@ export default function App() {
           weight={detailRow.weight}
           status={statusOf(detailRow.item)}
           pick={picks[detailRow.item.id]}
+          picks={picks}
           rank={ranking[detailRow.item.id]}
           cats={cats}
           onPick={onPick}

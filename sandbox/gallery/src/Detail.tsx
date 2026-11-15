@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { depList, PickControls, ScoreTag, STATUS_STYLE, type OnPick } from './Card'
 import { CatPalette, Suggestion } from './Cats'
-import { Preview, stageFor, type PreviewState, type Stage, type StageMode } from './Preview'
-import type { Categories, Item, Pick, Rank, Status, Weight } from './types'
+import { stageFor, type PreviewState, type Stage, type StageMode } from './Preview'
+import type { Categories, Item, Pick, Picks, Rank, Status, Weight } from './types'
+import { useVariants, VariantAside, VariantStage } from './VariantPanel'
 
 const VIEWPORTS = [
   { id: 'mobile', label: 'Mobile 390', width: 390 },
@@ -13,12 +14,20 @@ const VIEWPORTS = [
   { id: 'desktop', label: 'Desktop', width: undefined },
 ] as const
 
+let lastVp: (typeof VIEWPORTS)[number]['id'] = 'desktop' // kept while stepping through items (the variants state below is per item)
+
 // Only this item renders here, so heavy WebGL items get the whole stage to themselves.
-export function Detail({
+// Keyed by item, so every item starts on its original with its own variants state.
+export function Detail(props: Parameters<typeof DetailInner>[0]) {
+  return <DetailInner key={props.item.id} {...props} />
+}
+
+function DetailInner({
   item,
   status,
   weight,
   pick,
+  picks,
   rank,
   cats,
   onPick,
@@ -34,6 +43,7 @@ export function Detail({
   status: Status
   weight: Weight
   pick?: Pick
+  picks: Picks // all picks: variants are keyed `<item id>#<variant>`
   rank?: Rank
   cats: Categories
   onPick: OnPick
@@ -45,7 +55,11 @@ export function Detail({
   onBack: () => void
   onStep: (d: -1 | 1) => void
 }) {
-  const [vp, setVp] = useState<(typeof VIEWPORTS)[number]['id']>('desktop')
+  const [vp, setVp] = useState(lastVp)
+  const v = useVariants(item)
+  const vNames = v.names
+  const vView = v.view
+  const setView = v.setView
   const [stage, setStage] = useState<Stage>(stageFor(item, mode))
   const [state, setState] = useState<PreviewState>('idle')
   const tone = cats.groups.find((g) => g.id === 'tone')?.values ?? []
@@ -54,10 +68,11 @@ export function Detail({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target
-      if ((t instanceof Element && t.closest('input, textarea, select, [contenteditable]')) || e.metaKey || e.ctrlKey || e.altKey) return
+      if ((t instanceof Element && t.closest('input, textarea, select, [contenteditable], [role="dialog"]')) || e.metaKey || e.ctrlKey || e.altKey) return
       if (e.key === 'ArrowLeft') onStep(-1)
       else if (e.key === 'ArrowRight') onStep(1)
       else if (e.key === 'Escape') onBack()
+      else if (e.key.toLowerCase() === 'v' && vNames.length > 1) setView(vNames[(vNames.indexOf(vView) + 1) % vNames.length])
       else if (/^[1-9]$/.test(e.key) && tone[Number(e.key) - 1]) {
         // 1-9 set the Tone (again to clear); status keys A/C/R/D live in PickControls and advance the queue
         const id = tone[Number(e.key) - 1].id
@@ -66,9 +81,9 @@ export function Detail({
     }
     addEventListener('keydown', onKey)
     return () => removeEventListener('keydown', onKey)
-  }, [onStep, onBack, onPick, item.id, pick?.tone, tone])
+  }, [onStep, onBack, onPick, item.id, pick?.tone, tone, vNames, vView, setView])
 
-  const width = VIEWPORTS.find((v) => v.id === vp)!.width
+  const width = VIEWPORTS.find((vw) => vw.id === vp)!.width
   return (
     <div className="flex min-h-screen flex-col" data-detail={item.id}>
       <header className="sticky top-0 z-20 flex flex-wrap items-center gap-2 border-b bg-background/95 px-4 py-2 backdrop-blur">
@@ -88,21 +103,21 @@ export function Detail({
         </Button>
         <span className="mx-2 hidden h-5 w-px bg-border sm:block" />
         <div className="flex gap-1" role="group" aria-label="Preview width">
-          {VIEWPORTS.map((v) => (
-            <Button key={v.id} size="sm" variant={vp === v.id ? 'default' : 'outline'} aria-pressed={vp === v.id} onClick={() => setVp(v.id)}>
-              {v.label}
+          {VIEWPORTS.map((vw) => (
+            <Button key={vw.id} size="sm" variant={vp === vw.id ? 'default' : 'outline'} aria-pressed={vp === vw.id} onClick={() => ((lastVp = vw.id), setVp(vw.id))}>
+              {vw.label}
             </Button>
           ))}
         </div>
         <Button size="sm" variant="outline" aria-pressed={stage === 'dark'} onClick={() => setStage((s) => (s === 'light' ? 'dark' : 'light'))}>
           Bg: {stage}
         </Button>
-        <span className="ml-auto hidden text-xs text-muted-foreground lg:block">← → switch item · A adopt · C candidate · R reject · D delete (note) · 1-4 tone · Esc back</span>
+        <span className="ml-auto hidden text-xs text-muted-foreground lg:block">← → switch item · A adopt · C candidate · R reject · D delete (note) · 1-4 tone · V variants · Esc back</span>
       </header>
 
       <main className="grid flex-1 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <section className="min-w-0">
-          <Preview key={item.id} item={item} stage={stage} width={width} eager onState={setState} className="h-[calc(100vh-9rem)] min-h-[24rem]" />
+          <VariantStage item={item} v={v} stage={stage} width={width} onState={setState} />
         </section>
 
         <aside className="flex flex-col gap-3 text-sm">
@@ -145,6 +160,7 @@ export function Detail({
               </p>
             </div>
           )}
+          <VariantAside item={item} v={v} stage={stage} picks={picks} cats={cats} onPick={onPick} />
           <PickControls item={item} pick={pick} rank={rank} onPick={onPick} shortcuts onDone={onDone} />
           <Suggestion pick={pick} rank={rank} cats={cats} onApply={(patch) => onPick(item.id, patch)} />
           <CatPalette pick={pick} cats={cats} onChange={(patch) => onPick(item.id, patch)} />

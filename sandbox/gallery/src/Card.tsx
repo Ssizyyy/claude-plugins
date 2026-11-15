@@ -23,7 +23,7 @@ const ACTIONS: { status: PickStatus; label: string }[] = [
   { status: 'deleted', label: 'Delete' },
 ]
 
-export type PickPatch = { status?: PickStatus | null; note?: string } & CatPatch
+export type PickPatch = { status?: PickStatus | null; note?: string; preferredVariant?: string | null } & CatPatch
 export type OnPick = (id: string, patch: PickPatch) => void
 
 export const depList = (item: Item) => item.dependencies.map((d) => d.replace(/@[\^~]?[\d.]+$/, '')).join(', ') || 'no deps'
@@ -47,6 +47,7 @@ export function PickControls({
   extra,
   shortcuts,
   onDone,
+  noDelete,
 }: {
   item: Item
   pick?: Pick
@@ -55,6 +56,7 @@ export function PickControls({
   extra?: ReactNode
   shortcuts?: boolean
   onDone?: () => void
+  noDelete?: boolean // variants are removed with their own Delete, not tombstoned
 }) {
   const [note, setNote] = useState(pick?.note ?? '')
   const [needReason, setNeedReason] = useState(false)
@@ -83,7 +85,7 @@ export function PickControls({
     const keys: Record<string, PickStatus> = { a: 'adopted', c: 'candidate', r: 'rejected', d: 'deleted' }
     const onKey = (e: KeyboardEvent) => {
       const t = e.target
-      if ((t instanceof Element && t.closest('input, textarea, select, [contenteditable]')) || e.metaKey || e.ctrlKey || e.altKey) return
+      if ((t instanceof Element && t.closest('input, textarea, select, [contenteditable], [role="dialog"]')) || e.metaKey || e.ctrlKey || e.altKey) return
       const s = keys[e.key.toLowerCase()]
       if (s) {
         e.preventDefault()
@@ -98,7 +100,7 @@ export function PickControls({
   return (
     <>
       <div className="flex flex-wrap gap-1.5">
-        {ACTIONS.map(({ status: s, label }) => (
+        {ACTIONS.filter((a) => !noDelete || a.status !== 'deleted').map(({ status: s, label }) => (
           <Button key={s} size="sm" variant={pick?.status === s ? 'default' : 'outline'} aria-pressed={pick?.status === s} onClick={() => act(s)}>
             {label}
             {shortcuts && <kbd className="ml-1 rounded bg-muted px-1 text-[10px] text-muted-foreground">{label[0]}</kbd>}

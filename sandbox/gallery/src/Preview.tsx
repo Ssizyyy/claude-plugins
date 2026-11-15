@@ -1,6 +1,7 @@
 import { Component, createElement, lazy, Suspense, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import demoProps from '../demo-props.json'
 import type { Item } from './types'
+import { tokenStyle, type Tokens } from './variants'
 
 export type Stage = 'light' | 'dark'
 export type StageMode = Stage | 'auto'
@@ -27,8 +28,13 @@ class Boundary extends Component<{ children: ReactNode; onError: (m: string) => 
   }
 }
 
-function loadComponent(item: Item) {
-  const load = loaders[`./items/${item.source}/${item.key}/${item.fetch.entry}`]
+// slot 'original' is the downloaded source; anything else is a working copy of a variant under src/work/ (see variants.mjs).
+// Those are imported by URL: Vite serves them with HMR, and files that appear later need no glob refresh.
+function loadComponent(item: Item, slot: string) {
+  const load =
+    slot === 'original'
+      ? loaders[`./items/${item.source}/${item.key}/${item.fetch.entry}`]
+      : () => import(/* @vite-ignore */ `/src/work/${item.source}/${item.key}/${slot}/files/${item.fetch.entry}`) as Promise<Record<string, unknown>>
   if (!load) throw new Error('source not on disk: run npm run gallery:fetch')
   return lazy(async () => {
     const mod = await load()
@@ -45,14 +51,14 @@ function Mount({ onMount }: { onMount: () => void }) {
   return null
 }
 
-function Live({ item, onError, onLoaded }: { item: Item; onError: (m: string) => void; onLoaded: () => void }) {
+function Live({ item, slot, onError, onLoaded }: { item: Item; slot: string; onError: (m: string) => void; onLoaded: () => void }) {
   const [C, err] = useMemo(() => {
     try {
-      return [loadComponent(item), undefined] as const
+      return [loadComponent(item, slot), undefined] as const
     } catch (e) {
       return [undefined, (e as Error).message] as const
     }
-  }, [item])
+  }, [item, slot])
   useEffect(() => {
     if (err) onError(err)
   }, [err, onError])
@@ -112,6 +118,8 @@ export function Preview({
   className = 'h-56',
   width,
   eager,
+  slot = 'original',
+  tokens,
 }: {
   item: Item
   stage: Stage
@@ -119,6 +127,8 @@ export function Preview({
   className?: string
   width?: number | string
   eager?: boolean // detail page: always mounted, no viewport gating
+  slot?: string // 'original', '_draft' or a variant name
+  tokens?: Tokens // theme overrides, applied as CSS variables on the stage
 }) {
   const box = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
@@ -178,7 +188,7 @@ export function Preview({
     <div
       ref={box}
       data-state={state}
-      style={width ? { width, maxWidth: '100%' } : undefined}
+      style={{ ...(width ? { width, maxWidth: '100%' } : null), ...tokenStyle(tokens) }}
       className={`relative isolate mx-auto w-full overflow-hidden rounded-md border [contain:layout_paint] ${className} ${
         stage === 'dark' ? 'dark polished bg-neutral-900 text-neutral-100' : 'stage-light polished bg-white text-neutral-900'
       }`}
@@ -190,7 +200,7 @@ export function Preview({
         </div>
       ) : (
         <div ref={inner} className="relative flex h-full w-full items-center justify-center">
-          {near && <Live key={attempt} item={item} onError={setError} onLoaded={() => setLoaded(true)} />}
+          {near && <Live key={attempt} item={item} slot={slot} onError={setError} onLoaded={() => setLoaded(true)} />}
         </div>
       )}
       {!error && LABEL[state] && (
