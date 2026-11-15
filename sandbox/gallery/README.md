@@ -52,6 +52,18 @@ Applying picks to `curated.json`, refreshing and releasing is a separate step.
 
 `scripts/refresh.mjs` rebuilds `components.json` from the registries, so a deleted item would come back as `unreviewed`. When picks are applied it must read the tombstones (from `curated.json`, e.g. `"status": "deleted"`) and drop those ids from `out`, keeping them in a `deleted` list in `curated.json` so the next import skips them too.
 
+## Choose components (`design-pass` handoff)
+
+`design-pass` can ask you to pick components before it builds ("Pick components in the gallery?"). Setup: set `UI_GALLERY_DIR` to this checkout's `sandbox/gallery` (design-pass starts `npm run gallery` from there, port 5174).
+
+| Route | What it shows |
+|---|---|
+| `#/select/<run-id>` | One row per need: the suggested default (pre-selected), up to four alternatives, and a **None / plain shadcn** tile. Shared needs (the app kit) come first, then each page's needs, then an **Extras** strip (tick to use). **Done** writes your choices. Items that add an npm package are hidden in Safe mode behind **Show items that add a package**; picking one lists the package in a banner and counts as your yes to install it. |
+| `#/review/<run-id>` | After the build: each used item next to its alternatives. Click an alternative to mark a swap, **Save swaps** writes them. Applying swaps is a normal design-pass run on that screen with the swap list. |
+
+Files, all in `<data dir>/runs/` (see "Where your data lives"): `<run-id>.json` (design-pass: needs and shortlist), `<run-id>.selection.json` (Done), `<run-id>.result.json` (design-pass after the build: what was used), `<run-id>.swaps.json` (review), `kit-<project>.json` (shared choices that later runs of the same project reuse without asking). Say "done" in chat after pressing Done; design-pass reads the file, nothing polls. The shortlist script is `plugins/design-stack/skills/design-pass/scripts/shortlist.mjs`; with `UI_GALLERY_DIR` set it also skips items that failed to fetch or render. Used items get status `used` in `picks.json`.
+
+
 ## Gitignored, and why
 
 - `src/items/`: downloaded third-party source and `_status.json`. The repo is public and React Bits is MIT + Commons Clause, so its source must never be committed.
