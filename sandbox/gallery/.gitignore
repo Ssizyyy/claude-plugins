@@ -1,0 +1,7 @@
+node_modules
+dist
+*.local
+# Third-party source downloaded by `npm run fetch`. Never commit: the repo is public and
+# React Bits is MIT + Commons Clause.
+src/items/
+.fetch-cache/

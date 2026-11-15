@@ -2,7 +2,7 @@
 
 Installs only pick up a release when `version` in `.claude-plugin/plugin.json` changes.
 
-## 2.5.0 (2026-11-12)
+## 2.6.0 (2026-11-15)
 
 - Mode is chosen by the skill you start, not by a question. `design-pass` is Safe (no new packages, no motion). New `design-pass-free` is Free (no dependency lock, heavy effects allowed, control motion included). It is model-invocable for premium-look requests ("I want a premium looking app") and counts such a request as the yes to Free and motion. The shared procedure moved to `design-pass/references/core.md`.
 - In Free mode the React Bits tools (`reactbits-tools`) are used without being asked, for heroes, empty states and product shots with no fitting catalog item. Downloads still need your yes.
@@ -10,6 +10,10 @@ Installs only pick up a release when `version` in `.claude-plugin/plugin.json` c
 - Fixes from a Free-mode trial on the sandbox: a precedence section in `core.md` (the locks outrank third-party skill text; no questions, fix instead of report), a default when nobody can answer the design-system offer, allowed fake-API and `?data=worst` hooks, light-only before shots when the app has no dark mode, a note on stale inspector state and hash-router anchors; `control-motion` now states its real cost range and what to do on screens without selection controls; `reactbits-tools` saves exports from inside the page when downloads are unavailable.
 - `design-pass` no longer reads or writes the `design-pass mode:` line in `DESIGN.md`; an existing line is ignored.
 - The step-3 `modern-web-guidance` consult and the Trial 4 evidence line from 2.4.0 now live in `design-pass/references/core.md`.
+
+## 2.5.0 (2026-11-15)
+
+- `ui-component-catalog` gains notes on three more shadcn registries: Kokonut UI (AI/agent UI), Cult UI (app overlays, form controls) and SmoothUI (`motion`-only items, 35 blocks). All MIT. The notes record install commands, deps, Safe vs Free fit, standouts and overlap. The components are not indexed in `components.json` and no upstream source is bundled. Research behind it: `research/ui-sources-2026-11.md`.
 
 ## 2.4.0 (2026-11-12)
 

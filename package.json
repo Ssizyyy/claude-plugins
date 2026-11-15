@@ -1,0 +1,8 @@
+{
+  "name": "claude-plugins",
+  "private": true,
+  "scripts": {
+    "gallery": "npm run gallery --prefix sandbox/gallery",
+    "gallery:fetch": "npm run gallery:fetch --prefix sandbox/gallery"
+  }
+}
