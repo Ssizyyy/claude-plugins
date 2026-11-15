@@ -1,0 +1,115 @@
+{
+  "groups": [
+    {
+      "id": "tone",
+      "label": "Tone",
+      "multi": false,
+      "values": [
+        {
+          "id": "serious-product",
+          "label": "Serious product UI",
+          "surface": "app",
+          "rule": "Preferred."
+        },
+        {
+          "id": "serious-brand",
+          "label": "Serious brand and marketing",
+          "surface": "marketing",
+          "rule": "Preferred."
+        },
+        {
+          "id": "playful",
+          "label": "Playful",
+          "rule": "Neutral."
+        },
+        {
+          "id": "showpiece",
+          "label": "Showpiece / silly",
+          "rule": "Never in Safe mode. Free mode only on request."
+        }
+      ]
+    },
+    {
+      "id": "roles",
+      "label": "Role",
+      "multi": true,
+      "values": [
+        {
+          "id": "navigation",
+          "label": "Navigation"
+        },
+        {
+          "id": "forms",
+          "label": "Forms and inputs"
+        },
+        {
+          "id": "data",
+          "label": "Data display"
+        },
+        {
+          "id": "feedback",
+          "label": "Feedback and status"
+        },
+        {
+          "id": "layout",
+          "label": "Layout and cards"
+        },
+        {
+          "id": "text-effects",
+          "label": "Text effects"
+        },
+        {
+          "id": "backgrounds",
+          "label": "Backgrounds"
+        },
+        {
+          "id": "overlays",
+          "label": "Overlays"
+        },
+        {
+          "id": "loaders",
+          "label": "Loaders and indicators"
+        },
+        {
+          "id": "sections",
+          "label": "Full sections"
+        }
+      ]
+    },
+    {
+      "id": "styles",
+      "label": "Style",
+      "multi": true,
+      "values": [
+        {
+          "id": "minimal",
+          "label": "Minimal"
+        },
+        {
+          "id": "editorial",
+          "label": "Editorial"
+        },
+        {
+          "id": "glass",
+          "label": "Glass and gradient"
+        },
+        {
+          "id": "brutalist",
+          "label": "Brutalist"
+        },
+        {
+          "id": "retro",
+          "label": "Retro"
+        },
+        {
+          "id": "futuristic",
+          "label": "Futuristic"
+        },
+        {
+          "id": "cute",
+          "label": "Cute and cartoon"
+        }
+      ]
+    }
+  ]
+}

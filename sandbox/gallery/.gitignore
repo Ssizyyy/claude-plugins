@@ -5,3 +5,7 @@ dist
 # React Bits is MIT + Commons Clause.
 src/items/
 .fetch-cache/
+.rank-shots/
+.rank-batches/
+
+picks.json

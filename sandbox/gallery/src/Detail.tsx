@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { depList, PickControls, STATUS_STYLE, type OnPick } from './Card'
+import { depList, PickControls, ScoreTag, STATUS_STYLE, type OnPick } from './Card'
+import { CatPalette, Suggestion } from './Cats'
 import { Preview, stageFor, type PreviewState, type Stage, type StageMode } from './Preview'
-import type { Item, Pick, Status, Weight } from './types'
+import type { Categories, Item, Pick, Rank, Status, Weight } from './types'
 
 const VIEWPORTS = [
   { id: 'mobile', label: 'Mobile 390', width: 390 },
@@ -18,10 +19,14 @@ export function Detail({
   status,
   weight,
   pick,
+  rank,
+  cats,
   onPick,
   stage: mode,
   index,
   total,
+  queue,
+  onDone,
   onBack,
   onStep,
 }: {
@@ -29,16 +34,21 @@ export function Detail({
   status: Status
   weight: Weight
   pick?: Pick
+  rank?: Rank
+  cats: Categories
   onPick: OnPick
   stage: StageMode
   index: number
   total: number
+  queue?: { left: number } // set inside the review queue
+  onDone: () => void
   onBack: () => void
   onStep: (d: -1 | 1) => void
 }) {
   const [vp, setVp] = useState<(typeof VIEWPORTS)[number]['id']>('desktop')
   const [stage, setStage] = useState<Stage>(stageFor(item, mode))
   const [state, setState] = useState<PreviewState>('idle')
+  const tone = cats.groups.find((g) => g.id === 'tone')?.values ?? []
   useEffect(() => setStage(stageFor(item, mode)), [mode, item])
 
   useEffect(() => {
@@ -48,24 +58,31 @@ export function Detail({
       if (e.key === 'ArrowLeft') onStep(-1)
       else if (e.key === 'ArrowRight') onStep(1)
       else if (e.key === 'Escape') onBack()
+      else if (/^[1-9]$/.test(e.key) && tone[Number(e.key) - 1]) {
+        // 1-9 set the Tone (again to clear); status keys A/C/R/D live in PickControls and advance the queue
+        const id = tone[Number(e.key) - 1].id
+        onPick(item.id, { tone: pick?.tone === id ? null : id })
+      }
     }
     addEventListener('keydown', onKey)
     return () => removeEventListener('keydown', onKey)
-  }, [onStep, onBack])
+  }, [onStep, onBack, onPick, item.id, pick?.tone, tone])
 
   const width = VIEWPORTS.find((v) => v.id === vp)!.width
   return (
     <div className="flex min-h-screen flex-col" data-detail={item.id}>
       <header className="sticky top-0 z-20 flex flex-wrap items-center gap-2 border-b bg-background/95 px-4 py-2 backdrop-blur">
         <Button variant="outline" size="sm" onClick={onBack}>
-          ← Back to grid
+          {queue ? '← Leave queue' : '← Back to grid'}
         </Button>
         <Button variant="ghost" size="sm" onClick={() => onStep(-1)} disabled={total < 2} aria-label="Previous item">
           ← Prev
         </Button>
         <span className="text-sm tabular-nums text-muted-foreground">
+          {queue ? 'Queue ' : ''}
           {index + 1} / {total}
         </span>
+        {queue && <span className="rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">{queue.left} undecided</span>}
         <Button variant="ghost" size="sm" onClick={() => onStep(1)} disabled={total < 2} aria-label="Next item">
           Next →
         </Button>
@@ -80,7 +97,7 @@ export function Detail({
         <Button size="sm" variant="outline" aria-pressed={stage === 'dark'} onClick={() => setStage((s) => (s === 'light' ? 'dark' : 'light'))}>
           Bg: {stage}
         </Button>
-        <span className="ml-auto hidden text-xs text-muted-foreground lg:block">← → switch item, Esc back</span>
+        <span className="ml-auto hidden text-xs text-muted-foreground lg:block">← → switch item · A adopt · C candidate · R reject · D delete (note) · 1-4 tone · Esc back</span>
       </header>
 
       <main className="grid flex-1 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -116,7 +133,21 @@ export function Detail({
           </dl>
           {item.note && <p className="text-xs italic text-muted-foreground">catalog: {item.note}</p>}
           {pick?.reason && <p className="text-xs text-destructive">Deleted: {pick.reason}</p>}
-          <PickControls item={item} pick={pick} onPick={onPick} />
+          {rank && (
+            <div className="rounded border p-2 text-xs">
+              <div className="mb-1 flex items-center gap-2">
+                <ScoreTag rank={rank} />
+                <span className="text-muted-foreground">rank hint</span>
+              </div>
+              <p>{rank.reason}</p>
+              <p className="mt-1 text-muted-foreground">
+                {Object.entries(rank.scores).map(([k, v]) => `${k} ${v}`).join(' · ')}
+              </p>
+            </div>
+          )}
+          <PickControls item={item} pick={pick} rank={rank} onPick={onPick} shortcuts onDone={onDone} />
+          <Suggestion pick={pick} rank={rank} cats={cats} onApply={(patch) => onPick(item.id, patch)} />
+          <CatPalette pick={pick} cats={cats} onChange={(patch) => onPick(item.id, patch)} />
           <details className="text-xs" open={!!item.fetch.error}>
             <summary className="cursor-pointer text-muted-foreground">Fetch details</summary>
             <pre className="mt-1 overflow-auto whitespace-pre-wrap break-words rounded bg-muted p-2">{JSON.stringify(item.fetch, null, 2)}</pre>

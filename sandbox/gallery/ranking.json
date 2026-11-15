@@ -1,0 +1,405 @@
+[
+ {
+  "id": "ui-layouts/btn-animated-gradient",
+  "score": 3.4,
+  "scores": {
+   "appFit": 3,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 3,
+   "unique": 3
+  },
+  "reason": "Real button, gradient reads fine on light, but dark stage is murky and low-contrast; no reduced-motion guard",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-brand",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Gradient fill with soft glow shadow; marketing CTA feel, not neutral product UI"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-arrow-right",
+  "score": 3.8,
+  "scores": {
+   "appFit": 4,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 4,
+   "unique": 3
+  },
+  "reason": "Pill CTA with arrow disc, clean on both stages; real button, no reduced-motion; common pattern",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-brand",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Pill CTA with gradient and arrow disc, landing-page style"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-bg-shine",
+  "score": 3.2,
+  "scores": {
+   "appFit": 3,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 3,
+   "unique": 2
+  },
+  "reason": "Plain blue button with subtle shine; dull on dark, near-duplicate of animated-gradient",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-product",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Solid blue button with subtle shine; restrained"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-black-shadow",
+  "score": 3.8,
+  "scores": {
+   "appFit": 4,
+   "a11y": 4,
+   "depCost": 5,
+   "polish": 4,
+   "unique": 2
+  },
+  "reason": "Static, restrained secondary button that works in both themes; no motion so nothing to guard, but generic",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-product",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Plain white small button with light shadow, no gimmick"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-click-down",
+  "score": 3.2,
+  "scores": {
+   "appFit": 3,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 3,
+   "unique": 2
+  },
+  "reason": "Offset-shadow press button; rest state identical to hover-down, dark version muddy",
+  "blank": false,
+  "suggested": {
+   "tone": "playful",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Hard offset block shadow that presses down, neo-brutalist feel"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-creative-right",
+  "score": 2.6,
+  "scores": {
+   "appFit": 2,
+   "a11y": 1,
+   "depCost": 4,
+   "polish": 3,
+   "unique": 3
+  },
+  "reason": "Div not button, no keyboard or focus path, hover-only fill, hardcoded colours; dark stage flips to bare white pill",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-brand",
+   "roles": [
+    "forms",
+    "navigation"
+   ],
+   "reason": "Outlined pill with dot that expands on hover, agency-site button"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-creative-top",
+  "score": 2.6,
+  "scores": {
+   "appFit": 2,
+   "a11y": 1,
+   "depCost": 5,
+   "polish": 3,
+   "unique": 2
+  },
+  "reason": "Div with hover-only slide reveal, no keyboard access, hardcoded green; near-twin of creative-right",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-brand",
+   "roles": [
+    "forms",
+    "navigation"
+   ],
+   "reason": "Outlined pill with hover fill from top, agency-site style"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-cross-arrow",
+  "score": 4.4,
+  "scores": {
+   "appFit": 5,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 5,
+   "unique": 4
+  },
+  "reason": "Real button, polished pill with arrow swap and proper light/dark variants; no reduced-motion guard",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-brand",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Pill with black arrow disc that swaps on hover, polished marketing CTA"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-hover-down",
+  "score": 3.4,
+  "scores": {
+   "appFit": 3,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 4,
+   "unique": 2
+  },
+  "reason": "Offset-shadow button with good light/dark variants, but duplicates click-down",
+  "blank": false,
+  "suggested": {
+   "tone": "playful",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Offset solid shadow button that shifts on hover, chunky look"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-hover-left-flip",
+  "score": 2.8,
+  "scores": {
+   "appFit": 2,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 2,
+   "unique": 2
+  },
+  "reason": "Rest state looks like a plain button with an odd right edge line; flip effect adds little, weak light contrast",
+  "blank": false,
+  "suggested": {
+   "tone": "playful",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Flip-on-hover text swap is a visible gimmick on a plain button"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-hover-multiple",
+  "score": 3.2,
+  "scores": {
+   "appFit": 3,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 3,
+   "unique": 2
+  },
+  "reason": "Real button, soft gradient hover; near-identical to top-flip siblings; light state is faint, no reduced-motion guard",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-product",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Neutral pill with border; hover is subtle"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-hover-outline",
+  "score": 3.6,
+  "scores": {
+   "appFit": 4,
+   "a11y": 3,
+   "depCost": 4,
+   "polish": 4,
+   "unique": 3
+  },
+  "reason": "Strong high-contrast pill that inverts on hover and adapts to both themes; anchor to '#', icon-only dep on lucide",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-brand",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Black pill with chevrons, strong marketing CTA"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-hover-top-flip",
+  "score": 2.8,
+  "scores": {
+   "appFit": 2,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 3,
+   "unique": 1
+  },
+  "reason": "Same gradient-flip hover as multiple/slowflip with a different radius; pure duplicate of a family sibling",
+  "blank": false,
+  "suggested": {
+   "tone": "playful",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Text flips vertically on hover, a gimmick effect"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-hover-top-slowflip",
+  "score": 2.8,
+  "scores": {
+   "appFit": 2,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 3,
+   "unique": 1
+  },
+  "reason": "Only slower timing than top-flip; hardest duplicate in the group, pale in light mode",
+  "blank": false,
+  "suggested": {
+   "tone": "playful",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Slow text flip on hover, gimmick effect"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-hover-underline",
+  "score": 3.6,
+  "scores": {
+   "appFit": 4,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 3,
+   "unique": 3
+  },
+  "reason": "Understated underline-slide text button usable as a nav/link action; no focus style, unstyled at rest looks plain",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-product",
+   "roles": [
+    "forms",
+    "navigation"
+   ],
+   "reason": "Bare text link with animated underline, minimal"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-hover14",
+  "score": 3.2,
+  "scores": {
+   "appFit": 4,
+   "a11y": 3,
+   "depCost": 4,
+   "polish": 2,
+   "unique": 3
+  },
+  "reason": "Good CTA with sliding arrow, but dark stage shows no pill and relies on custom slide-anime and tokens",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-brand",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Teal pill with arrow, clean CTA with soft shadow"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-rotating-gradient",
+  "score": 3.8,
+  "scores": {
+   "appFit": 4,
+   "a11y": 2,
+   "depCost": 5,
+   "polish": 4,
+   "unique": 4
+  },
+  "reason": "Distinct animated gradient border that reads well on both stages; infinite rotation with no reduced-motion guard",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-brand",
+   "roles": [
+    "forms"
+   ],
+   "reason": "White pill with rotating gradient border, tasteful accent"
+  }
+ },
+ {
+  "id": "ui-layouts/btn-text-change",
+  "score": 3,
+  "scores": {
+   "appFit": 3,
+   "a11y": 2,
+   "depCost": 5,
+   "polish": 3,
+   "unique": 2
+  },
+  "reason": "Text-swap hover hides label change from keyboard users likely; at rest identical to other gradient pills",
+  "blank": false,
+  "suggested": {
+   "tone": "playful",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Label swaps text on hover, a novelty effect"
+  }
+ },
+ {
+  "id": "ui-layouts/button-active",
+  "score": 3.4,
+  "scores": {
+   "appFit": 3,
+   "a11y": 3,
+   "depCost": 5,
+   "polish": 4,
+   "unique": 2
+  },
+  "reason": "Clean tactile pressed-state button, good both themes, but another gradient rectangle like its neighbours",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-product",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Plain bordered button with active press state, no gimmick"
+  }
+ },
+ {
+  "id": "ui-layouts/button-hover-right",
+  "score": 3.4,
+  "scores": {
+   "appFit": 3,
+   "a11y": 2,
+   "depCost": 5,
+   "polish": 3,
+   "unique": 4
+  },
+  "reason": "Icon-only circle that expands to reveal 'Visit' on hover; unique, but label is hidden at rest and gradient is garish in light",
+  "blank": false,
+  "suggested": {
+   "tone": "serious-brand",
+   "roles": [
+    "forms"
+   ],
+   "reason": "Gradient circle icon button that expands on hover, CTA style"
+  }
+ }
+]
