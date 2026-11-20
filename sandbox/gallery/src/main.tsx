@@ -2,6 +2,8 @@ import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 
+captureConsole()
+
 // WebGL canvases clear after each frame, so the "renders blank" check could not read them. Keep the buffer.
 const getContext = HTMLCanvasElement.prototype.getContext
 HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, type: string, attrs?: unknown) {
@@ -9,6 +11,7 @@ HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, type
   return (getContext as (t: string, a?: unknown) => unknown).call(this, type, webgl ? { ...(attrs as object), preserveDrawingBuffer: true } : attrs)
 } as typeof getContext
 import App from './App'
+import { captureConsole } from './reports'
 import { Review, Select } from './Run'
 
 // design-pass handoff routes (#/select/<run>, #/review/<run>) replace the grid; everything else is the gallery

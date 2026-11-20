@@ -8,6 +8,7 @@ import { CategoryManager } from './Categories'
 import { Card, STATUS_STYLE, type PickPatch } from './Card'
 import { Detail } from './Detail'
 import { Grid } from './Grid'
+import { galleryVersion, recentErrors, type Report, type ReportApi } from './reports'
 import type { StageMode } from './Preview'
 import { assigned, fetchState, GROUP_IDS, uncategorized, type Categories, type CatPatch, type GroupId, type Item, type Picks, type Ranking, type Status, type Weight } from './types'
 
@@ -55,6 +56,7 @@ interface Saved {
   stage: StageMode
   cat: Partial<Record<GroupId, string[]>>
   uncat: boolean
+  reported: boolean
 }
 const loadSaved = (): Partial<Saved> => {
   try {
@@ -126,17 +128,19 @@ export default function App() {
   const [data, setData] = useState<DataInfo>()
   const [seen, setSeen] = useState(() => { try { return localStorage.getItem(SEEN_KEY) } catch { return null } })
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [reports, setReports] = useState<Report[]>([])
+  const [onlyReported, setOnlyReported] = useState(!!saved.reported)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [dark, setDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches)
 
   useEffect(() => {
-    const s: Saved = { q: need ? '' : q, source, family, statuses: [...statuses], surfaces: [...surfaces], weights: [...weights], fetches: [...fetches], sort, minScore, stage, cat: { tone: [...cat.tone], roles: [...cat.roles] }, uncat }
+    const s: Saved = { q: need ? '' : q, source, family, statuses: [...statuses], surfaces: [...surfaces], weights: [...weights], fetches: [...fetches], sort, minScore, stage, cat: { tone: [...cat.tone], roles: [...cat.roles] }, uncat, reported: onlyReported }
     try {
       localStorage.setItem(FILTER_KEY, JSON.stringify(s))
     } catch {
       /* private mode: filters just are not saved */
     }
-  }, [q, need, source, family, statuses, surfaces, weights, fetches, sort, minScore, stage, cat, uncat])
+  }, [q, need, source, family, statuses, surfaces, weights, fetches, sort, minScore, stage, cat, uncat, onlyReported])
   const resetFilters = () => {
     setQ('')
     setSource('')
@@ -149,6 +153,7 @@ export default function App() {
     setMinScore(0)
     setCat({ tone: new Set(), roles: new Set() })
     setUncat(false)
+    setOnlyReported(false)
   }
 
   // #/item/<source>/<key> opens the detail page, #/queue/<source>/<key> the same page inside the review queue.
@@ -177,8 +182,9 @@ export default function App() {
   }, [dark])
 
   useEffect(() => {
-    Promise.all([fetch('/api/items').then((r) => r.json()), fetch('/api/picks').then((r) => r.json()), fetch('/api/ranking').then((r) => r.json()), fetch('/api/categories').then((r) => r.json())])
-      .then(([i, p, r, c]) => {
+    Promise.all([fetch('/api/items').then((r) => r.json()), fetch('/api/picks').then((r) => r.json()), fetch('/api/ranking').then((r) => r.json()), fetch('/api/categories').then((r) => r.json()), fetch('/api/reports').then((r) => r.json())])
+      .then(([i, p, r, c, rep]) => {
+        setReports(rep.reports ?? [])
         setCats(c)
         fetch('/api/data').then((r) => r.json()).then(setData)
         setItems(i)
@@ -194,6 +200,22 @@ export default function App() {
   }, [])
   const onBulk = (patch: CatPatch) => post('/api/picks', { ids: [...selected], ...patch }).then((p) => p.picks && setPicks(p.picks))
   const saveCats = (c: Categories) => post('/api/categories', c).then((d) => d.groups && setCats(d))
+  const openReports = useMemo(() => {
+    const m = new Map<string, Report[]>()
+    for (const r of reports) if (r.status === 'open') m.set(r.itemId, [...(m.get(r.itemId) ?? []), r])
+    return m
+  }, [reports])
+  const sendReport = useCallback((body: unknown) => post('/api/reports', body).then((d) => d.reports && setReports(d.reports)), [])
+  const reportApi = useCallback(
+    (item: Item): ReportApi => ({
+      open: openReports.get(item.id) ?? [],
+      add: (it, symptom, ctx, note) =>
+        sendReport({ action: 'add', report: { itemId: it.id, source: it.source, symptom, note, state: ctx.state, width: ctx.width, stage: ctx.stage, page: dark ? 'dark' : 'light', errors: recentErrors(), version: galleryVersion } }),
+      undo: () => sendReport({ action: 'undo', itemId: item.id }),
+      fixed: () => sendReport({ action: 'fix', itemId: item.id }),
+    }),
+    [openReports, sendReport, dark],
+  )
   const select = useCallback((id: string) => setSelected((s) => toggle(s, id)), [])
 
   // a Tone the user set decides the surface (product UI = app, brand = marketing); otherwise the item's own tag
@@ -225,6 +247,7 @@ export default function App() {
         .filter(
           ({ item, weight }) =>
             statuses.has(statusOf(item)) &&
+            (!onlyReported || openReports.has(item.id)) &&
             surfaces.has(surfaceOf(item)) &&
             weights.has(weight) &&
             fetches.has(fetchState(item)) &&
@@ -232,7 +255,7 @@ export default function App() {
         )
         .sort(sorter),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searched, statuses, surfaces, weights, fetches, minScore, sort, ranking, statusOf, cats],
+    [searched, statuses, surfaces, weights, fetches, minScore, sort, ranking, statusOf, cats, onlyReported, openReports],
   )
 
   // review queue: a snapshot taken when it opens; an item you decide is dropped from it once you move off it
@@ -288,7 +311,7 @@ export default function App() {
   const failed = items.filter((i) => fetchState(i) === 'failed').length
   const ranked = Object.keys(ranking).length
   // how many of the filters behind the Filters button differ from their defaults
-  const extraActive = [surfaces.size < SURFACES.length, weights.size < WEIGHTS.length, fetches.size < FETCHES.length, minScore > 0].filter(Boolean).length
+  const extraActive = [surfaces.size < SURFACES.length, weights.size < WEIGHTS.length, fetches.size < FETCHES.length, minScore > 0, onlyReported].filter(Boolean).length
 
   // one-time import of the old in-repo picks.json / ranking.json: say what happened until dismissed
   const m = data?.migration
@@ -322,6 +345,7 @@ export default function App() {
           onDone={afterPick}
           onBack={back}
           onStep={step}
+          report={reportApi(detailRow.item)}
         />
       )}
       {onCats && <CategoryManager cats={cats} picks={picks} onSave={saveCats} onBack={back} />}
@@ -452,6 +476,12 @@ export default function App() {
                         </Chip>
                       ))}
                     </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="w-14 text-muted-foreground">Reports</span>
+                      <Chip on={onlyReported} onClick={() => setOnlyReported(!onlyReported)} off="hover:bg-muted" title="Show only items with an open report">
+                        Reported {openReports.size}
+                      </Chip>
+                    </div>
                     <label className="flex items-center gap-1.5" title={ranked ? '' : 'No ranking yet: run /gallery-rank'}>
                       <span className="w-14 text-muted-foreground">Min score</span>
                       <select value={minScore} onChange={(e) => setMinScore(Number(e.target.value))} className="rounded border bg-background px-1.5 py-1 text-foreground" aria-label="Minimum score">
@@ -488,7 +518,7 @@ export default function App() {
               items={visible}
               hidden={!!detailId || onCats}
               getKey={({ item }) => item.id}
-              render={({ item, weight }) => <Card item={item} weight={weight} status={statusOf(item)} pick={picks[item.id]} rank={ranking[item.id]} cats={cats} selected={selected.has(item.id)} onSelect={select} onPick={onPick} stage={stage} />}
+              render={({ item, weight }) => <Card item={item} weight={weight} status={statusOf(item)} pick={picks[item.id]} rank={ranking[item.id]} cats={cats} selected={selected.has(item.id)} onSelect={select} onPick={onPick} stage={stage} report={reportApi(item)} />}
             />
             {!visible.length && !loadError && <p className="py-16 text-center text-muted-foreground">Nothing matches these filters.</p>}
             <footer className="mt-8 flex flex-wrap gap-x-4 gap-y-1 border-t pt-3 text-xs text-muted-foreground">

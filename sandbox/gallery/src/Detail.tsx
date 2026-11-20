@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { depList, PickControls, ScoreTag, STATUS_STYLE, type OnPick } from './Card'
 import { RoleSelect, Suggestion, TonePicker } from './Cats'
 import { stageFor, type PreviewState, type Stage, type StageMode } from './Preview'
+import { ReportButton, ReportedChip, symptomFor, useAutoClear, type ReportApi } from './reports'
 import type { Categories, Item, Pick, Picks, Rank, Status, Weight } from './types'
 import { useVariants, VariantAside, VariantStage } from './VariantPanel'
 
@@ -38,6 +39,7 @@ function DetailInner({
   onDone,
   onBack,
   onStep,
+  report,
 }: {
   item: Item
   status: Status
@@ -54,6 +56,7 @@ function DetailInner({
   onDone: () => void
   onBack: () => void
   onStep: (d: -1 | 1) => void
+  report: ReportApi
 }) {
   const [vp, setVp] = useState(lastVp)
   const v = useVariants(item)
@@ -64,6 +67,10 @@ function DetailInner({
   const [state, setState] = useState<PreviewState>('idle')
   const tone = cats.groups.find((g) => g.id === 'tone')?.values ?? []
   useEffect(() => setStage(stageFor(item, mode)), [mode, item])
+  useAutoClear(report, state)
+  const reportCtx = () => ({ width: VIEWPORTS.find((vw) => vw.id === vp)!.width ?? innerWidth, stage, state })
+  const reportRef = useRef(() => {})
+  reportRef.current = () => (report.add(item, symptomFor(state), reportCtx()), onDone()) // B: file with the symptom the preview shows, then next in the queue
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -72,6 +79,7 @@ function DetailInner({
       if (e.key === 'ArrowLeft') onStep(-1)
       else if (e.key === 'ArrowRight') onStep(1)
       else if (e.key === 'Escape') onBack()
+      else if (e.key.toLowerCase() === 'b') reportRef.current()
       else if (e.key.toLowerCase() === 'v' && vNames.length > 1) setView(vNames[(vNames.indexOf(vView) + 1) % vNames.length])
       else if (/^[1-9]$/.test(e.key) && tone[Number(e.key) - 1]) {
         // 1-9 set the Tone (again to clear); status keys A/C/R/D live in PickControls and advance the queue
@@ -112,7 +120,7 @@ function DetailInner({
         <Button size="sm" variant="outline" aria-pressed={stage === 'dark'} onClick={() => setStage((s) => (s === 'light' ? 'dark' : 'light'))}>
           Bg: {stage}
         </Button>
-        <span className="ml-auto hidden text-xs text-muted-foreground lg:block">← → switch item · A adopt · C candidate · R reject · D delete (note) · 1-4 tone · V variants · Esc back</span>
+        <span className="ml-auto hidden text-xs text-muted-foreground lg:block">← → switch item · A adopt · C candidate · R reject · D delete (note) · B report · 1-4 tone · V variants · Esc back</span>
       </header>
 
       <main className="grid flex-1 gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
@@ -124,6 +132,7 @@ function DetailInner({
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge className={cn('border-transparent', STATUS_STYLE[status])}>{status}</Badge>
             {pick?.status && <span className="text-xs text-muted-foreground">picked</span>}
+            <ReportedChip api={report} withFixed />
             <span className="ml-auto text-xs text-muted-foreground" data-preview-state={state}>
               {item.source} / {item.family}
             </span>
@@ -165,7 +174,7 @@ function DetailInner({
             <RoleSelect pick={pick} cats={cats} onChange={(patch) => onPick(item.id, patch)} />
             <Suggestion pick={pick} rank={rank} cats={cats} onApply={(patch) => onPick(item.id, patch)} />
           </div>
-          <PickControls item={item} pick={pick} rank={rank} onPick={onPick} shortcuts onDone={onDone} />
+          <PickControls item={item} pick={pick} rank={rank} onPick={onPick} shortcuts onDone={onDone} extra={<ReportButton item={item} api={report} ctx={reportCtx} shortcut />} />
           <VariantAside item={item} v={v} picks={picks} cats={cats} onPick={onPick} />
           <details className="text-xs" open={!!item.fetch.error}>
             <summary className="cursor-pointer text-muted-foreground">Fetch details</summary>

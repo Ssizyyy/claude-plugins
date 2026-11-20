@@ -13,6 +13,7 @@ const root = dirname(fileURLToPath(import.meta.url));
 export const dataDir = process.env.UI_GALLERY_DATA_DIR || join(homedir(), '.claude', 'ui-gallery');
 export const picksFile = join(dataDir, 'picks.json');
 export const rankingFile = join(dataDir, 'ranking.json');
+export const reportsFile = join(dataDir, 'reports.json'); // "does not load" reports; /gallery-fix reads them
 const legacyPicks = join(root, 'picks.json'); // used to be committed here
 const legacyRanking = join(root, 'ranking.json'); // still committed as the seed from the proof run
 const KEEP = 20;
@@ -134,3 +135,29 @@ export function readPicks() {
 }
 
 export const readRanking = () => readJson(rankingFile, []).map((r) => (r.suggested?.roles ? { ...r, suggested: { ...r.suggested, roles: mapRoles(r.suggested.roles) } } : r));
+
+// ---------- reports ----------
+// reports.json: { reports: [{ id, itemId, source, symptom, note, state, width, stage, page, errors[], at, version,
+//   status: 'open' | 'fixed' | 'wontrender' | 'undone', closedAt?, resolution? }] }. History is kept: a new report never replaces one.
+export const readReports = () => readJson(reportsFile, { reports: [] });
+
+// action: add { report } | fix { itemId, resolution?, status? } closes every open report of the item | undo { itemId } drops the latest open one.
+// The file is read inside the call, so concurrent requests cannot overwrite each other.
+export function changeReports(body) {
+  const file = readReports();
+  const now = new Date().toISOString();
+  const open = (id) => file.reports.filter((r) => r.itemId === id && r.status === 'open');
+  if (body.action === 'add') {
+    const r = body.report ?? {};
+    if (typeof r.itemId !== 'string' || !r.itemId) throw new Error('bad report');
+    file.reports.push({ ...r, id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, at: now, status: 'open' });
+  } else if (body.action === 'fix') {
+    const status = body.status === 'wontrender' ? 'wontrender' : 'fixed';
+    for (const r of open(body.itemId)) Object.assign(r, { status, closedAt: now, ...(body.resolution ? { resolution: String(body.resolution) } : {}) });
+  } else if (body.action === 'undo') {
+    const last = open(body.itemId).at(-1);
+    if (last) Object.assign(last, { status: 'undone', closedAt: now });
+  } else throw new Error('bad action');
+  writeData(reportsFile, file);
+  return file;
+}
