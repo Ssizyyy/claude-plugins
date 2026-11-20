@@ -24,7 +24,6 @@ export interface Pick {
   // user-set categories: ids from categories.json (an id that was later removed stays, shown as flagged)
   tone?: string
   roles?: string[]
-  styles?: string[]
   preferredVariant?: string // on an item: the variant design-pass should use
   at?: string
 }
@@ -49,9 +48,9 @@ export const hintFor = (r?: Rank): PickStatus | undefined => (!r ? undefined : r
 
 export const fetchState = (i: Item) => (!i.fetch.error ? 'ok' : i.fetch.error.startsWith('not fetched') ? 'not fetched' : 'failed')
 
-// categories.json: three fixed groups, each an ordered list of values the user edits in the manager screen.
-export type GroupId = 'tone' | 'roles' | 'styles'
-export const GROUP_IDS: GroupId[] = ['tone', 'roles', 'styles']
+// categories.json: two fixed groups, each an ordered list of values the user edits in the manager screen.
+export type GroupId = 'tone' | 'roles'
+export const GROUP_IDS: GroupId[] = ['tone', 'roles']
 export interface CatValue {
   id: string
   label: string
@@ -74,6 +73,5 @@ export const uncategorized = (p?: Pick) => !p?.tone && !p?.roles?.length
 export interface CatPatch {
   tone?: string | null
   roles?: string[]
-  styles?: string[]
-  add?: { roles?: string[]; styles?: string[] }
+  add?: { roles?: string[] }
 }

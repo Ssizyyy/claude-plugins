@@ -1,7 +1,6 @@
 import { Component, createElement, lazy, Suspense, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import demoProps from '../demo-props.json'
 import type { Item } from './types'
-import { tokenStyle, type Tokens } from './variants'
 
 export type Stage = 'light' | 'dark'
 export type StageMode = Stage | 'auto'
@@ -119,7 +118,6 @@ export function Preview({
   width,
   eager,
   slot = 'original',
-  tokens,
 }: {
   item: Item
   stage: Stage
@@ -128,7 +126,6 @@ export function Preview({
   width?: number | string
   eager?: boolean // detail page: always mounted, no viewport gating
   slot?: string // 'original', '_draft' or a variant name
-  tokens?: Tokens // theme overrides, applied as CSS variables on the stage
 }) {
   const box = useRef<HTMLDivElement>(null)
   const inner = useRef<HTMLDivElement>(null)
@@ -188,7 +185,7 @@ export function Preview({
     <div
       ref={box}
       data-state={state}
-      style={{ ...(width ? { width, maxWidth: '100%' } : null), ...tokenStyle(tokens) }}
+      style={{ ...(width ? { width, maxWidth: '100%' } : null) }}
       className={`relative isolate mx-auto w-full overflow-hidden rounded-md border [contain:layout_paint] ${className} ${
         stage === 'dark' ? 'dark polished bg-neutral-900 text-neutral-100' : 'stage-light polished bg-white text-neutral-900'
       }`}
