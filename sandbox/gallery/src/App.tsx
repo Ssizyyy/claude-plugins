@@ -64,12 +64,13 @@ const loadSaved = (): Partial<Saved> => {
   }
 }
 
-function Chip({ on, onClick, children, className, off }: { on: boolean; onClick: () => void; children: ReactNode; className?: string; off?: string }) {
+function Chip({ on, onClick, children, className, off, title }: { on: boolean; onClick: () => void; children: ReactNode; className?: string; off?: string; title?: string }) {
   return (
     <button
       type="button"
       aria-pressed={on}
       onClick={onClick}
+      title={title}
       className={cn(
         'rounded-full border px-2.5 py-1 text-xs motion-safe:transition-colors',
         on ? (className ?? 'border-primary bg-primary text-primary-foreground') : off ?? 'text-muted-foreground line-through opacity-70 hover:opacity-100',
@@ -234,7 +235,7 @@ export default function App() {
     [searched, statuses, surfaces, weights, fetches, minScore, sort, ranking, statusOf, cats],
   )
 
-  // review queue: a snapshot taken when it opens, so items don't vanish from under the cursor as they are decided
+  // review queue: a snapshot taken when it opens; an item you decide is dropped from it once you move off it
   const [queueIds, setQueueIds] = useState<string[] | null>(null)
   const buildQueue = () => searched.filter(({ item }) => ['unreviewed', 'candidate'].includes(statusOf(item))).sort(sorter).map(({ item }) => item.id)
   useEffect(() => {
@@ -246,8 +247,12 @@ export default function App() {
     setQueueIds(ids)
     if (ids[0]) location.hash = `#/queue/${ids[0]}`
   }
-  const queueRows = useMemo(() => (queueIds ?? []).map((id) => rows.find((r) => r.item.id === id)).filter((r): r is NonNullable<typeof r> => !!r), [queueIds, rows])
-  const undecided = queueRows.filter(({ item }) => ['unreviewed', 'candidate'].includes(statusOf(item)) && !picks[item.id]?.status).length
+  const queueRows = useMemo(
+    () => (queueIds ?? []).map((id) => rows.find((r) => r.item.id === id)).filter((r): r is NonNullable<typeof r> => !!r && (!picks[r.item.id]?.status || r.item.id === detailId)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [queueIds, rows, picks, detailId],
+  )
+  const undecided = queueRows.filter(({ item }) => !picks[item.id]?.status).length
 
   const navRows = inQueue ? queueRows : visible
   const detailIdx = navRows.findIndex(({ item }) => item.id === detailId)
@@ -383,6 +388,9 @@ export default function App() {
             <div className="mb-4 flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="w-16 text-xs text-muted-foreground">Status</span>
+                <Chip on={statuses.size === 1 && statuses.has('unreviewed')} onClick={() => setStatuses(new Set(['unreviewed']))} off="hover:bg-muted" title="Show only items with no status yet">
+                  only no status
+                </Chip>
                 {STATUSES.map((s) => (
                   <Chip key={s} on={statuses.has(s)} onClick={() => setStatuses(toggle(statuses, s))} className={cn('border-transparent', STATUS_STYLE[s])}>
                     {s} {count((i) => statusOf(i) === s && (!source || i.source === source) && (!family || i.family === family))}

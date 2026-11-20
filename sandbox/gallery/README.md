@@ -38,7 +38,7 @@ Rendering is a gallery, not a faithful install: items that need props to show an
 
 ## Review queue
 
-**Review queue** in the header steps through the unreviewed and candidate items (within the current search and sidebar choice, in the current sort) one at a time on the detail page. Keys: **A** adopt, **C** candidate, **R** reject, **D** delete (puts the cursor in the note; type the reason, Enter confirms), **← →** move, **Esc** leaves. Any decision moves on to the next item. The queue is a snapshot taken when it opens, so decided items don't vanish under you. The same keys work on a normal detail page.
+**Review queue** in the header steps through the unreviewed and candidate items (within the current search and sidebar choice, in the current sort) one at a time on the detail page. Keys: **A** adopt, **C** candidate, **R** reject, **D** delete (puts the cursor in the note; type the reason, Enter confirms), **← →** move, **Esc** leaves. Any decision moves on to the next item. The queue is a snapshot taken when it opens; an item you decide is removed from it once you move on (the last one stays until you leave it). The same keys work on a normal detail page.
 
 ## Ranking (`/gallery-rank`)
 
