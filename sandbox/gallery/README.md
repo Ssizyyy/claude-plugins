@@ -40,6 +40,14 @@ Rendering is a gallery, not a faithful install: items that need props to show an
 
 **Review queue** in the header steps through the unreviewed and candidate items (within the current search and sidebar choice, in the current sort) one at a time on the detail page. Keys: **A** adopt, **C** candidate, **R** reject, **D** delete (puts the cursor in the note; type the reason, Enter confirms), **← →** move, **Esc** leaves. Any decision moves on to the next item. The queue is a snapshot taken when it opens; an item you decide is removed from it once you move on (the last one stays until you leave it). The same keys work on a normal detail page.
 
+## Reporting components that don't load
+
+**Report** (card on hover, next to Adopt / Candidate / Reject / Delete; detail page, next to the pick buttons) opens a small picker: an optional one-line note, then one click on the symptom: Blank, Stuck loading, Error shown, Looks wrong, Other. In the review queue **B** reports the item with the symptom its preview shows (error, blank, stuck loading, else Other) and moves to the next one. A report records the item id and source, symptom and note, how the preview looked (`state`), the preview width (the card's, or the detail page's width switcher), the stage and page background (light or dark), the last five console errors, the time and the gallery version (`package.json`).
+
+Reports are written to `reports.json` in the data dir (see below), with the same safe write and timestamped backups as `picks.json`; never into the repo. The item keeps its status and stays in grid and queue. While a report is open the card and the detail page show a **Reported** chip with **undo** (drops the latest report); the detail page also has **Fixed**. The Filters popover has a **Reported** chip that shows only items with an open report. A second report on a still-reported item adds another entry, so the history is kept. **Fixed**, or a re-render that succeeds after the item was reported while it was not rendering, closes the open reports; the item can then be reported again.
+
+`/gallery-fix` (project skill in `.claude/skills/gallery-fix/`, invoke-only, not shipped) works through the open reports: it tries to repair each item (a `demo-props.json` entry via `scripts/demo-guess.mjs`, import or shim fixes, a re-fetch), re-renders it with `scripts/shots.mjs --probe`, then marks the report fixed or marks the item won't render with a reason. It uses Sonnet sub-agents, one per item.
+
 ## Ranking (`/gallery-rank`)
 
 `/gallery-rank <family|source|all> [--limit N] [--resume] [--force]` (project skill in `.claude/skills/gallery-rank/`) screenshots each item on a light and a dark stage with the system Chrome or Edge (`scripts/shots.mjs`, via `playwright-core`; no browser is downloaded), has Sonnet sub-agents score it 1 to 5 on app fit, accessibility and reduced motion, dependency cost, visual polish and uniqueness, and writes `ranking.json` (`{id, score, scores, reason, blank}`). Cards and the detail page show the score and reason; the grid sorts by it and filters by **Min score**. **Accept hint** sets a pick from the score (4 or more: Candidate; 2.5 or less or blank: Reject); you can also ignore it. Picks always win and the ranking never writes to `picks.json`. `scripts/shots.mjs --probe <ids>` only reports how each item renders.
@@ -84,6 +92,7 @@ Picks (status, notes, categories) and the `/gallery-rank` scores are the work yo
 | ~/.claude/ui-gallery/variants/ | your saved variants (`<source>/<key>/<name>/`), see Variants |
 | ~/.claude/ui-gallery/settings.json | the remembered export target project and the last few used |
 | `~/.claude/ui-gallery/ranking.json` | `/gallery-rank` scores and suggestions (they cost tokens to regenerate) |
+| `~/.claude/ui-gallery/reports.json` | Report button entries (`{reports: [...]}`, each with `status`: open, fixed, wontrender or undone) |
 | `~/.claude/ui-gallery/backups/` | the last 20 timestamped copies of each file, at most one a minute |
 
 - Override the folder with the env var `UI_GALLERY_DATA_DIR`. The gallery shows the path in the page footer. Export picks still downloads a copy.

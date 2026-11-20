@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-import { Preview, stageFor, type Stage, type StageMode } from './Preview'
+import { Preview, stageFor, type PreviewState, type Stage, type StageMode } from './Preview'
+import { ReportButton, ReportedChip, useAutoClear, type ReportApi } from './reports'
 import { labelOf } from './Cats'
 import { assigned, hintFor, type Categories, type CatPatch, type Item, type Pick, type PickStatus, type Rank, type Status, type Weight } from './types'
 
@@ -138,7 +139,7 @@ export function PickControls({
 const ACTION_KEYS: Record<string, PickStatus> = { a: 'adopted', c: 'candidate', r: 'rejected', d: 'deleted' }
 
 // Chips on the card: Tone, up to two Roles, status (not shown while unreviewed). Empty means no chip, not a placeholder.
-function CardChips({ pick, status, cats }: { pick?: Pick; status: Status; cats: Categories }) {
+function CardChips({ pick, status, cats, report }: { pick?: Pick; status: Status; cats: Categories; report: ReportApi }) {
   const roles = assigned(pick, 'roles')
   const chip = 'shrink-0 rounded-full border px-2 py-0.5 text-xs'
   const flag = (g: 'tone' | 'roles', id: string) => labelOf(cats, g, id) ?? `⚠ ${id}`
@@ -149,6 +150,7 @@ function CardChips({ pick, status, cats }: { pick?: Pick; status: Status; cats: 
         <span key={id} className={cn(chip, 'bg-muted')}>{flag('roles', id)}</span>
       ))}
       {roles.length > 2 && <span className="shrink-0 text-xs text-muted-foreground">+{roles.length - 2}</span>}
+      <ReportedChip api={report} />
       {status !== 'unreviewed' && <span className={cn(chip, 'border-transparent', STATUS_STYLE[status])}>{status}</span>}
     </div>
   )
@@ -165,6 +167,7 @@ export function Card({
   onSelect,
   onPick,
   stage,
+  report,
 }: {
   item: Item
   status: Status
@@ -176,7 +179,11 @@ export function Card({
   onSelect: (id: string) => void
   onPick: OnPick
   stage: StageMode
+  report: ReportApi
 }) {
+  const [state, setState] = useState<PreviewState>('idle')
+  const previewBox = useRef<HTMLDivElement>(null)
+  useAutoClear(report, state)
   const [flip, setFlip] = useState(false)
   const base = stageFor(item, stage)
   const shown: Stage = flip ? (base === 'light' ? 'dark' : 'light') : base
@@ -207,7 +214,9 @@ export function Card({
       className="group flex flex-col gap-3 overflow-hidden rounded-lg border bg-card p-3 text-card-foreground shadow-[var(--shadow-sm)] outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="relative">
-        <Preview item={item} stage={shown} className="h-96" />
+        <div ref={previewBox}>
+          <Preview item={item} stage={shown} className="h-96" onState={setState} />
+        </div>
         <input type="checkbox" checked={selected} onChange={() => onSelect(item.id)} aria-label={`Select ${item.title}`} className="absolute left-2 top-2 z-10 size-4" />
         {rank && (
           <span className="absolute right-2 top-2 z-10">
@@ -220,6 +229,7 @@ export function Card({
               {label}
             </Button>
           ))}
+          <ReportButton item={item} api={report} size="xs" ctx={() => ({ width: Math.round(previewBox.current?.offsetWidth ?? 0), stage: shown, state })} />
           <Button size="xs" variant="ghost" aria-pressed={flip} onClick={() => setFlip((f) => !f)} title="Flip this preview's background">
             Bg: {shown}
           </Button>
@@ -234,7 +244,7 @@ export function Card({
         {weight !== 'basic' && <span className={cn('size-2 shrink-0 self-center rounded-full', weight === 'heavy' ? 'bg-warning' : 'bg-info')} title={`Adds a package (${weight}): ${depList(item)}`} data-package-dot />}
         <span className="ml-auto shrink-0 text-xs text-muted-foreground">{item.source}</span>
       </div>
-      <CardChips pick={pick} status={status} cats={cats} />
+      <CardChips pick={pick} status={status} cats={cats} report={report} />
     </article>
   )
 }

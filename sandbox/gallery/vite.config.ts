@@ -5,11 +5,13 @@ import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { handle as variantsApi } from './variants.mjs'
 import { runsApi } from './runs-api.mjs'
-import { backupCount, dataDir, lastMigration, migrate, picksFile, readPicks, readRanking, writeData } from './data.mjs'
+import { backupCount, changeReports, dataDir, lastMigration, migrate, picksFile, readPicks, readRanking, readReports, writeData } from './data.mjs'
 
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 const catalogPath = here('../../plugins/design-stack/skills/ui-component-catalog/catalog/components.json')
 const statusPath = here('./src/items/_status.json')
+
+const version: string = JSON.parse(readFileSync(here('./package.json'), 'utf8')).version
 
 const readJson = (p: string, fallback: unknown) => (existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : fallback)
 const categoriesPath = here('./categories.json')
@@ -54,6 +56,11 @@ function galleryApi(): Plugin {
       server.middlewares.use('/api/data', (_req, res) => {
         res.setHeader('content-type', 'application/json')
         res.end(JSON.stringify({ dir: dataDir, picks: picksFile, backups: backupCount(), migration: lastMigration() }))
+      })
+      // "Does not load" reports (reports.json in the data dir). POST { action: add | fix | undo, ... }, see changeReports in data.mjs.
+      server.middlewares.use('/api/reports', (req, res) => {
+        res.setHeader('content-type', 'application/json')
+        readBody(req, res, (body) => (body ? changeReports(JSON.parse(body)) : readReports()))
       })
       // Category definitions (groups tone/roles, each an ordered list of values): the manager screen replaces the whole file.
       server.middlewares.use('/api/categories', (req, res) => {
@@ -118,6 +125,7 @@ function galleryApi(): Plugin {
 }
 
 export default defineConfig({
+  define: { __GALLERY_VERSION__: JSON.stringify(version) },
   plugins: [react(), tailwindcss(), galleryApi(), runsApi()],
   // next/* and @repo/shadcn: stand-ins for items copied out of Next or monorepo apps
   resolve: { alias: { '@': here('./src'), 'next/image': here('./src/shims/next-image.tsx'), 'next/link': here('./src/shims/next-link.tsx'), '@repo/shadcn': here('./src/shims/repo-shadcn.ts') } },
