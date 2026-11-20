@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
-import { CatPalette } from './Cats'
+import { RoleSelect, TonePicker } from './Cats'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { CategoryManager } from './Categories'
 import { Card, STATUS_STYLE, type PickPatch } from './Card'
 import { Detail } from './Detail'
@@ -52,7 +53,7 @@ interface Saved {
   sort: Sort
   minScore: number
   stage: StageMode
-  cat: Record<GroupId, string[]>
+  cat: Partial<Record<GroupId, string[]>>
   uncat: boolean
 }
 const loadSaved = (): Partial<Saved> => {
@@ -63,12 +64,13 @@ const loadSaved = (): Partial<Saved> => {
   }
 }
 
-function Chip({ on, onClick, children, className, off }: { on: boolean; onClick: () => void; children: ReactNode; className?: string; off?: string }) {
+function Chip({ on, onClick, children, className, off, title }: { on: boolean; onClick: () => void; children: ReactNode; className?: string; off?: string; title?: string }) {
   return (
     <button
       type="button"
       aria-pressed={on}
       onClick={onClick}
+      title={title}
       className={cn(
         'rounded-full border px-2.5 py-1 text-xs motion-safe:transition-colors',
         on ? (className ?? 'border-primary bg-primary text-primary-foreground') : off ?? 'text-muted-foreground line-through opacity-70 hover:opacity-100',
@@ -119,15 +121,16 @@ export default function App() {
   const [stage, setStage] = useState<StageMode>(forced === 'light' || forced === 'dark' ? forced : (saved.stage ?? 'auto'))
   const [cats, setCats] = useState<Categories>({ groups: [] })
   // category filters: nothing picked in a group = no filter on it; several picked = any of them
-  const [cat, setCat] = useState<Record<GroupId, Set<string>>>(() => ({ tone: new Set(saved.cat?.tone), roles: new Set(saved.cat?.roles), styles: new Set(saved.cat?.styles) }))
+  const [cat, setCat] = useState<Record<GroupId, Set<string>>>(() => ({ tone: new Set(saved.cat?.tone), roles: new Set(saved.cat?.roles) }))
   const [uncat, setUncat] = useState(!!saved.uncat)
   const [data, setData] = useState<DataInfo>()
   const [seen, setSeen] = useState(() => { try { return localStorage.getItem(SEEN_KEY) } catch { return null } })
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [dark, setDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches)
 
   useEffect(() => {
-    const s: Saved = { q: need ? '' : q, source, family, statuses: [...statuses], surfaces: [...surfaces], weights: [...weights], fetches: [...fetches], sort, minScore, stage, cat: { tone: [...cat.tone], roles: [...cat.roles], styles: [...cat.styles] }, uncat }
+    const s: Saved = { q: need ? '' : q, source, family, statuses: [...statuses], surfaces: [...surfaces], weights: [...weights], fetches: [...fetches], sort, minScore, stage, cat: { tone: [...cat.tone], roles: [...cat.roles] }, uncat }
     try {
       localStorage.setItem(FILTER_KEY, JSON.stringify(s))
     } catch {
@@ -144,7 +147,7 @@ export default function App() {
     setFetches(new Set(FETCHES))
     setSort('name')
     setMinScore(0)
-    setCat({ tone: new Set(), roles: new Set(), styles: new Set() })
+    setCat({ tone: new Set(), roles: new Set() })
     setUncat(false)
   }
 
@@ -164,6 +167,10 @@ export default function App() {
   const onCats = hash === '#/categories'
   const inQueue = hash.startsWith('#/queue/')
   const detailId = inQueue ? decodeURIComponent(hash.slice(8)) : hash.startsWith('#/item/') ? decodeURIComponent(hash.slice(7)) : ''
+
+  useEffect(() => {
+    if (detailId || onCats) setFiltersOpen(false) // the popover is portalled, so hiding the grid would not hide it
+  }, [detailId, onCats])
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
@@ -228,7 +235,7 @@ export default function App() {
     [searched, statuses, surfaces, weights, fetches, minScore, sort, ranking, statusOf, cats],
   )
 
-  // review queue: a snapshot taken when it opens, so items don't vanish from under the cursor as they are decided
+  // review queue: a snapshot taken when it opens; an item you decide is dropped from it once you move off it
   const [queueIds, setQueueIds] = useState<string[] | null>(null)
   const buildQueue = () => searched.filter(({ item }) => ['unreviewed', 'candidate'].includes(statusOf(item))).sort(sorter).map(({ item }) => item.id)
   useEffect(() => {
@@ -240,8 +247,12 @@ export default function App() {
     setQueueIds(ids)
     if (ids[0]) location.hash = `#/queue/${ids[0]}`
   }
-  const queueRows = useMemo(() => (queueIds ?? []).map((id) => rows.find((r) => r.item.id === id)).filter((r): r is NonNullable<typeof r> => !!r), [queueIds, rows])
-  const undecided = queueRows.filter(({ item }) => ['unreviewed', 'candidate'].includes(statusOf(item)) && !picks[item.id]?.status).length
+  const queueRows = useMemo(
+    () => (queueIds ?? []).map((id) => rows.find((r) => r.item.id === id)).filter((r): r is NonNullable<typeof r> => !!r && (!picks[r.item.id]?.status || r.item.id === detailId)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [queueIds, rows, picks, detailId],
+  )
+  const undecided = queueRows.filter(({ item }) => !picks[item.id]?.status).length
 
   const navRows = inQueue ? queueRows : visible
   const detailIdx = navRows.findIndex(({ item }) => item.id === detailId)
@@ -276,6 +287,8 @@ export default function App() {
   const notFetched = items.filter((i) => fetchState(i) === 'not fetched').length
   const failed = items.filter((i) => fetchState(i) === 'failed').length
   const ranked = Object.keys(ranking).length
+  // how many of the filters behind the Filters button differ from their defaults
+  const extraActive = [surfaces.size < SURFACES.length, weights.size < WEIGHTS.length, fetches.size < FETCHES.length, minScore > 0].filter(Boolean).length
 
   // one-time import of the old in-repo picks.json / ranking.json: say what happened until dismissed
   const m = data?.migration
@@ -375,29 +388,12 @@ export default function App() {
             <div className="mb-4 flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="w-16 text-xs text-muted-foreground">Status</span>
+                <Chip on={statuses.size === 1 && statuses.has('unreviewed')} onClick={() => setStatuses(new Set(['unreviewed']))} off="hover:bg-muted" title="Show only items with no status yet">
+                  only no status
+                </Chip>
                 {STATUSES.map((s) => (
                   <Chip key={s} on={statuses.has(s)} onClick={() => setStatuses(toggle(statuses, s))} className={cn('border-transparent', STATUS_STYLE[s])}>
                     {s} {count((i) => statusOf(i) === s && (!source || i.source === source) && (!family || i.family === family))}
-                  </Chip>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="w-16 text-xs text-muted-foreground">Surface</span>
-                {SURFACES.map((s) => (
-                  <Chip key={s} on={surfaces.has(s)} onClick={() => setSurfaces(toggle(surfaces, s))}>
-                    {s}
-                  </Chip>
-                ))}
-                <span className="ml-4 w-10 text-xs text-muted-foreground">Deps</span>
-                {WEIGHTS.map((w) => (
-                  <Chip key={w} on={weights.has(w)} onClick={() => setWeights(toggle(weights, w))}>
-                    {w}
-                  </Chip>
-                ))}
-                <span className="ml-4 w-10 text-xs text-muted-foreground">Fetch</span>
-                {FETCHES.map((f) => (
-                  <Chip key={f} on={fetches.has(f)} onClick={() => setFetches(toggle(fetches, f))}>
-                    {f} {count((i) => fetchState(i) === f)}
                   </Chip>
                 ))}
               </div>
@@ -416,23 +412,6 @@ export default function App() {
                   )}
                 </div>
               ))}
-              {selected.size > 0 && (
-                <div className="sticky top-[57px] z-10 flex flex-wrap items-center gap-3 rounded-lg border bg-background p-2 shadow-sm" data-bulk>
-                  <span className="text-sm font-medium">{selected.size} selected</span>
-                  <Button size="sm" variant="outline" onClick={() => setSelected(new Set(visible.map(({ item }) => item.id)))}>
-                    Select all {visible.length} shown
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
-                    Clear
-                  </Button>
-                  <details className="w-full text-xs">
-                    <summary className="cursor-pointer">Assign categories to the selection (adds to what they have; Tone replaces)</summary>
-                    <div className="mt-2">
-                      <CatPalette cats={cats} onChange={onBulk} bulk />
-                    </div>
-                  </details>
-                </div>
-              )}
               <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                 <label className="flex items-center gap-1.5">
                   Sort
@@ -442,27 +421,67 @@ export default function App() {
                     <option value="score">ranking (best first)</option>
                   </select>
                 </label>
-                <label className="flex items-center gap-1.5" title={ranked ? '' : 'No ranking yet: run /gallery-rank'}>
-                  Min score
-                  <select value={minScore} onChange={(e) => setMinScore(Number(e.target.value))} className="rounded border bg-background px-1.5 py-1 text-foreground" aria-label="Minimum score">
-                    {[0, 2, 3, 3.5, 4, 4.5].map((n) => (
-                      <option key={n} value={n}>
-                        {n ? `≥ ${n}` : 'any'}
-                      </option>
-                    ))}
-                  </select>
-                  <span>{ranked} ranked</span>
-                </label>
+                <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" data-filters-button>
+                      Filters{extraActive ? ` (${extraActive})` : ''} ▾
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="flex w-96 max-w-[calc(100vw-2rem)] flex-col gap-3 bg-card text-xs text-card-foreground ring-border" data-filters-popover>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="w-14 text-muted-foreground">Surface</span>
+                      {SURFACES.map((s) => (
+                        <Chip key={s} on={surfaces.has(s)} onClick={() => setSurfaces(toggle(surfaces, s))}>
+                          {s}
+                        </Chip>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="w-14 text-muted-foreground">Deps</span>
+                      {WEIGHTS.map((w) => (
+                        <Chip key={w} on={weights.has(w)} onClick={() => setWeights(toggle(weights, w))}>
+                          {w}
+                        </Chip>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="w-14 text-muted-foreground">Fetch</span>
+                      {FETCHES.map((f) => (
+                        <Chip key={f} on={fetches.has(f)} onClick={() => setFetches(toggle(fetches, f))}>
+                          {f} {count((i) => fetchState(i) === f)}
+                        </Chip>
+                      ))}
+                    </div>
+                    <label className="flex items-center gap-1.5" title={ranked ? '' : 'No ranking yet: run /gallery-rank'}>
+                      <span className="w-14 text-muted-foreground">Min score</span>
+                      <select value={minScore} onChange={(e) => setMinScore(Number(e.target.value))} className="rounded border bg-background px-1.5 py-1 text-foreground" aria-label="Minimum score">
+                        {[0, 2, 3, 3.5, 4, 4.5].map((n) => (
+                          <option key={n} value={n}>
+                            {n ? `≥ ${n}` : 'any'}
+                          </option>
+                        ))}
+                      </select>
+                      <span>{ranked} ranked</span>
+                    </label>
+                  </PopoverContent>
+                </Popover>
                 <button type="button" className="underline hover:text-foreground" onClick={resetFilters}>
                   Reset filters
                 </button>
-                <span>Filters are saved in this browser.</span>
-                {data && (
-                  <span data-data-path title={`Picks and rankings are stored here, outside the repo (${data.backups} backup file(s) in backups/). Override with UI_GALLERY_DATA_DIR.`}>
-                    Picks: <code>{data.picks}</code>
-                  </span>
-                )}
               </div>
+              {selected.size > 0 && (
+                <div className="sticky top-[57px] z-10 flex flex-wrap items-center gap-3 rounded-lg border bg-background p-2 shadow-sm" data-bulk>
+                  <span className="text-sm font-medium">{selected.size} selected</span>
+                  <Button size="sm" variant="outline" onClick={() => setSelected(new Set(visible.map(({ item }) => item.id)))}>
+                    Select all {visible.length} shown
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
+                    Clear
+                  </Button>
+                  <TonePicker cats={cats} onChange={onBulk} bulk />
+                  <RoleSelect cats={cats} onChange={onBulk} bulk />
+                </div>
+              )}
             </div>
             {loadError && <p className="text-destructive">{loadError}</p>}
             <Grid
@@ -472,6 +491,14 @@ export default function App() {
               render={({ item, weight }) => <Card item={item} weight={weight} status={statusOf(item)} pick={picks[item.id]} rank={ranking[item.id]} cats={cats} selected={selected.has(item.id)} onSelect={select} onPick={onPick} stage={stage} />}
             />
             {!visible.length && !loadError && <p className="py-16 text-center text-muted-foreground">Nothing matches these filters.</p>}
+            <footer className="mt-8 flex flex-wrap gap-x-4 gap-y-1 border-t pt-3 text-xs text-muted-foreground">
+              <span>Filters are saved in this browser.</span>
+              {data && (
+                <span data-data-path title={`Picks and rankings are stored here, outside the repo (${data.backups} backup file(s) in backups/). Override with UI_GALLERY_DATA_DIR.`}>
+                  Picks: <code>{data.picks}</code>
+                </span>
+              )}
+            </footer>
           </main>
         </div>
       </div>

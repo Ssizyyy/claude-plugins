@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { handle as variantsApi } from './variants.mjs'
 import { runsApi } from './runs-api.mjs'
-import { backupCount, dataDir, lastMigration, migrate, picksFile, rankingFile, readJson as readData, writeData } from './data.mjs'
+import { backupCount, dataDir, lastMigration, migrate, picksFile, readPicks, readRanking, writeData } from './data.mjs'
 
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 const catalogPath = here('../../plugins/design-stack/skills/ui-component-catalog/catalog/components.json')
@@ -13,7 +13,7 @@ const statusPath = here('./src/items/_status.json')
 
 const readJson = (p: string, fallback: unknown) => (existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : fallback)
 const categoriesPath = here('./categories.json')
-const GROUPS = ['tone', 'roles', 'styles']
+const GROUPS = ['tone', 'roles']
 const PICK_STATUSES = ['adopted', 'candidate', 'rejected', 'deleted']
 
 // Runs fn on a POST body (or with '' on GET) and sends its result as JSON; a throw becomes a 400.
@@ -37,6 +37,7 @@ function galleryApi(): Plugin {
     name: 'gallery-api',
     configureServer(server) {
       migrate()
+      readPicks() // moves old Role ids and the dropped Style group to the current shape (forced backup first)
       server.middlewares.use('/api/items', (_req, res) => {
         const catalog: { id: string }[] = readJson(catalogPath, { items: [] }).items
         const status = readJson(statusPath, {})
@@ -47,14 +48,14 @@ function galleryApi(): Plugin {
       // /gallery-rank output: an array of { id, score, scores, reason, blank }
       server.middlewares.use('/api/ranking', (_req, res) => {
         res.setHeader('content-type', 'application/json')
-        res.end(JSON.stringify(readData(rankingFile, [])))
+        res.end(JSON.stringify(readRanking()))
       })
       // Where the user's picks live, and what the one-time import of the old in-repo files did at startup.
       server.middlewares.use('/api/data', (_req, res) => {
         res.setHeader('content-type', 'application/json')
         res.end(JSON.stringify({ dir: dataDir, picks: picksFile, backups: backupCount(), migration: lastMigration() }))
       })
-      // Category definitions (groups tone/roles/styles, each an ordered list of values): the manager screen replaces the whole file.
+      // Category definitions (groups tone/roles, each an ordered list of values): the manager screen replaces the whole file.
       server.middlewares.use('/api/categories', (req, res) => {
         res.setHeader('content-type', 'application/json')
         readBody(req, res, (body) => {
@@ -82,12 +83,12 @@ function galleryApi(): Plugin {
         if (req.method === 'POST') req.on('data', (c) => (body += c)).on('end', done)
         else done()
       })
-      // One pick patch for one id or many (bulk): { id | ids, status?, note?, tone?, roles?, styles?, add?: { roles?, styles? } }.
+      // One pick patch for one id or many (bulk): { id | ids, status?, note?, tone?, roles?, add?: { roles? } }.
       // The file is read inside the handler so concurrent requests cannot overwrite each other.
       server.middlewares.use('/api/picks', (req, res) => {
         res.setHeader('content-type', 'application/json')
         readBody(req, res, (body) => {
-          const file = readData<{ picks: Record<string, any> }>(picksFile, { picks: {} })
+          const file: { picks: Record<string, any> } = readPicks()
           if (!body) return file
           const p = JSON.parse(body)
           const ids: unknown[] = p.ids ?? [p.id]
@@ -98,14 +99,14 @@ function galleryApi(): Plugin {
             if (p.note !== undefined) next.note = p.note || undefined
             if (p.preferredVariant !== undefined) next.preferredVariant = p.preferredVariant || undefined
             if (p.tone !== undefined) next.tone = p.tone || undefined
-            for (const g of ['roles', 'styles']) {
+            for (const g of ['roles']) {
               if (Array.isArray(p[g])) next[g] = p[g]
               if (Array.isArray(p.add?.[g])) next[g] = [...new Set([...(next[g] ?? []), ...p.add[g]])]
               if (!next[g]?.length) delete next[g]
             }
             if (next.status === 'deleted') next.reason = next.note ?? 'no reason given'
             else delete next.reason
-            if (next.status || next.note || next.tone || next.roles || next.styles || next.preferredVariant) file.picks[id] = { ...next, at: new Date().toISOString() }
+            if (next.status || next.note || next.tone || next.roles || next.preferredVariant) file.picks[id] = { ...next, at: new Date().toISOString() }
             else delete file.picks[id]
           }
           writeData(picksFile, file)

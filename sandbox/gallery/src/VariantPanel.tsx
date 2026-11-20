@@ -5,19 +5,17 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import demoProps from '../demo-props.json'
 import { PickControls, type OnPick } from './Card'
-import { CatPalette } from './Cats'
+import { RoleSelect, TonePicker } from './Cats'
 import { CodeEditor } from './CodeEditor'
 import { CopyButton, VariantDiff } from './Diff'
 import { ExportDialog } from './ExportDialog'
 import { Preview, type Stage } from './Preview'
-import { hasTokens } from './variants'
-import { Tweak } from './Tweak'
 import type { Categories, Item, Picks } from './types'
-import { api, describePrompt, slug, variantPickId, type Snap, type Tokens, type VariantList } from './variants'
+import { api, describePrompt, slug, variantPickId, type Snap, type VariantList } from './variants'
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e))
 
-// One slot's files and tokens, kept in sync with the dev server. Edits update local state at once and reach disk debounced.
+// One slot's files, kept in sync with the dev server. Edits update local state at once and reach disk debounced.
 function useSnap(item: Item, slot: string | null, onError: (m: string) => void) {
   const [snap, setSnap] = useState<Snap>()
   const [rev, setRev] = useState(0) // bumped when the content was re-read from disk, so the editor reloads
@@ -58,12 +56,7 @@ function useSnap(item: Item, slot: string | null, onError: (m: string) => void) 
     setSnap((s) => s && { ...s, dirty: true, files: s.files.map((f) => (f.path === path ? { ...f, content } : f)) })
     queue('f:' + path, 350, () => api.file(item, slot, path, content))
   }
-  const writeTokens = (tokens: Tokens) => {
-    if (!slot) return
-    setSnap((s) => s && { ...s, dirty: true, tokens })
-    queue('tokens', 200, () => api.tokens(item, slot, tokens))
-  }
-  return { snap, rev, saving: saving > 0, reload: load, writeFile, writeTokens }
+  return { snap, rev, saving: saving > 0, reload: load, writeFile }
 }
 
 export type Panel = '' | 'code' | 'diff'
@@ -111,15 +104,6 @@ export function useVariants(item: Item) {
     setCmp,
     setPanel,
     startDraft,
-    // theme tokens: the first change on the original starts a draft
-    setTokens: async (t: Tokens) => {
-      if (view === 'original') {
-        await api.draft(item)
-        await api.tokens(item, '_draft', t)
-        await run(() => api.list(item))
-        setView('_draft')
-      } else a.writeTokens(t)
-    },
     openCode: async () => {
       if (view === 'original') await startDraft()
       setPanel('code')
@@ -168,7 +152,6 @@ export function VariantStage({ item, v, stage, width, onState }: { item: Item; v
             item={item}
             stage={stage}
             slot={slot}
-            tokens={snap?.tokens}
             width={v.cmp ? undefined : width}
             eager
             onState={primary ? onState : undefined}
@@ -203,8 +186,8 @@ export function VariantStage({ item, v, stage, width, onState }: { item: Item; v
 
 const demo = demoProps as unknown as Record<string, Record<string, unknown>>
 
-// The sidebar part: variants row, actions, theme tokens, describe-the-change prompt, per-variant picks and exports.
-export function VariantAside({ item, v, stage, picks, cats, onPick }: { item: Item; v: V; stage: Stage; picks: Picks; cats: Categories; onPick: OnPick }) {
+// The sidebar part: variants row, actions, describe-the-change prompt, per-variant picks and exports.
+export function VariantAside({ item, v, picks, cats, onPick }: { item: Item; v: V; picks: Picks; cats: Categories; onPick: OnPick }) {
   const [inline, setInline] = useState<{ kind: 'save' | 'rename' | 'duplicate'; value: string } | null>(null)
   const [confirmDel, setConfirmDel] = useState(false)
   const [instruction, setInstruction] = useState('')
@@ -215,7 +198,6 @@ export function VariantAside({ item, v, stage, picks, cats, onPick }: { item: It
   const vpick = picks[vid]
   const count = v.list?.variants.length ?? 0
   const preferred = picks[item.id]?.preferredVariant
-  const tokens = v.view === 'original' ? {} : (v.a.snap?.tokens ?? {})
   const sv = v.a.snap
   const dirty = !!sv?.dirty
 
@@ -341,13 +323,6 @@ export function VariantAside({ item, v, stage, picks, cats, onPick }: { item: It
       </div>
 
       <details open className="text-xs">
-        <summary className="cursor-pointer font-medium">Theme tokens {hasTokens(tokens) && <span className="text-muted-foreground">({Object.keys(tokens).length} set)</span>}</summary>
-        <div className="mt-2">
-          <Tweak tokens={tokens} stage={stage} onChange={v.setTokens} />
-        </div>
-      </details>
-
-      <details open className="text-xs">
         <summary className="cursor-pointer font-medium">Describe the change</summary>
         <div className="mt-2 flex flex-col gap-1.5">
           <Textarea value={instruction} onChange={(e) => setInstruction(e.target.value)} rows={3} placeholder="e.g. make the cards smaller and add a hover lift" className="text-sm" aria-label="Describe the change" />
@@ -364,7 +339,8 @@ export function VariantAside({ item, v, stage, picks, cats, onPick }: { item: It
           <h4 className="text-xs font-medium">This variant: “{v.view}”</h4>
           {v.list?.variants.find((x) => x.name === v.view)?.meta.created && <p className="text-[11px] text-muted-foreground">created {new Date(v.list.variants.find((x) => x.name === v.view)!.meta.created!).toLocaleString()}</p>}
           <PickControls item={{ ...item, id: vid }} pick={vpick} onPick={onPick} noDelete />
-          <CatPalette pick={vpick} cats={cats} onChange={(patch) => onPick(vid, patch)} />
+          <TonePicker pick={vpick} cats={cats} onChange={(patch) => onPick(vid, patch)} />
+          <RoleSelect pick={vpick} cats={cats} onChange={(patch) => onPick(vid, patch)} />
           <div className="flex flex-wrap gap-1.5">
             <Button size="sm" onClick={() => setExporting(true)}>
               Copy into a project…

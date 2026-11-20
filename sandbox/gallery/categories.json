@@ -43,71 +43,20 @@
           "label": "Forms and inputs"
         },
         {
-          "id": "data",
-          "label": "Data display"
+          "id": "data-feedback",
+          "label": "Data and feedback"
         },
         {
-          "id": "feedback",
-          "label": "Feedback and status"
+          "id": "layout-overlays",
+          "label": "Layout and overlays"
         },
         {
-          "id": "layout",
-          "label": "Layout and cards"
-        },
-        {
-          "id": "text-effects",
-          "label": "Text effects"
-        },
-        {
-          "id": "backgrounds",
-          "label": "Backgrounds"
-        },
-        {
-          "id": "overlays",
-          "label": "Overlays"
-        },
-        {
-          "id": "loaders",
-          "label": "Loaders and indicators"
+          "id": "effects",
+          "label": "Effects and backgrounds"
         },
         {
           "id": "sections",
           "label": "Full sections"
-        }
-      ]
-    },
-    {
-      "id": "styles",
-      "label": "Style",
-      "multi": true,
-      "values": [
-        {
-          "id": "minimal",
-          "label": "Minimal"
-        },
-        {
-          "id": "editorial",
-          "label": "Editorial"
-        },
-        {
-          "id": "glass",
-          "label": "Glass and gradient"
-        },
-        {
-          "id": "brutalist",
-          "label": "Brutalist"
-        },
-        {
-          "id": "retro",
-          "label": "Retro"
-        },
-        {
-          "id": "futuristic",
-          "label": "Futuristic"
-        },
-        {
-          "id": "cute",
-          "label": "Cute and cartoon"
         }
       ]
     }

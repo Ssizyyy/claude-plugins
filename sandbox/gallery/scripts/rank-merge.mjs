@@ -4,14 +4,14 @@
 // score is computed here as the mean of the five scores (1 decimal); a blank render caps it at 2. Entries replace
 // older ones with the same id. Invalid entries are reported and skipped.
 import { readFileSync } from 'node:fs';
-import { migrate, rankingFile, readJson, writeData } from '../data.mjs';
+import { migrate, rankingFile, readRanking, writeData } from '../data.mjs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 migrate();
 const file = rankingFile; // the shared data dir (data.mjs), not the repo
-const byId = new Map(readJson(file, []).map((r) => [r.id, r]));
+const byId = new Map(readRanking().map((r) => [r.id, r]));
 const KEYS = ['appFit', 'a11y', 'depCost', 'polish', 'unique'];
 const cats = JSON.parse(readFileSync(join(root, 'categories.json'), 'utf8')).groups;
 const known = (g) => new Set(cats.find((x) => x.id === g).values.map((v) => v.id));

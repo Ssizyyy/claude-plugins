@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { Preview, stageFor, type Stage, type StageMode } from './Preview'
-import { CatChips, Suggestion } from './Cats'
-import { hintFor, type Categories, type CatPatch, type Item, type Pick, type PickStatus, type Rank, type Status, type Weight } from './types'
+import { labelOf } from './Cats'
+import { assigned, hintFor, type Categories, type CatPatch, type Item, type Pick, type PickStatus, type Rank, type Status, type Weight } from './types'
 
 export const STATUS_STYLE: Record<Status, string> = {
   used: 'bg-info text-info-foreground',
@@ -29,7 +28,7 @@ export type OnPick = (id: string, patch: PickPatch) => void
 export const depList = (item: Item) => item.dependencies.map((d) => d.replace(/@[\^~]?[\d.]+$/, '')).join(', ') || 'no deps'
 export const itemHref = (item: Item) => `#/item/${item.source}/${item.key}`
 
-export const CARD_H = 700
+export const CARD_H = 480
 
 export function ScoreTag({ rank }: { rank?: Rank }) {
   if (!rank) return null
@@ -85,7 +84,7 @@ export function PickControls({
     const keys: Record<string, PickStatus> = { a: 'adopted', c: 'candidate', r: 'rejected', d: 'deleted' }
     const onKey = (e: KeyboardEvent) => {
       const t = e.target
-      if ((t instanceof Element && t.closest('input, textarea, select, [contenteditable], [role="dialog"]')) || e.metaKey || e.ctrlKey || e.altKey) return
+      if ((t instanceof Element && t.closest('input, textarea, select, [contenteditable], [role="dialog"], [role="menu"]')) || e.metaKey || e.ctrlKey || e.altKey) return
       const s = keys[e.key.toLowerCase()]
       if (s) {
         e.preventDefault()
@@ -136,6 +135,25 @@ export function PickControls({
   )
 }
 
+const ACTION_KEYS: Record<string, PickStatus> = { a: 'adopted', c: 'candidate', r: 'rejected', d: 'deleted' }
+
+// Chips on the card: Tone, up to two Roles, status (not shown while unreviewed). Empty means no chip, not a placeholder.
+function CardChips({ pick, status, cats }: { pick?: Pick; status: Status; cats: Categories }) {
+  const roles = assigned(pick, 'roles')
+  const chip = 'shrink-0 rounded-full border px-2 py-0.5 text-xs'
+  const flag = (g: 'tone' | 'roles', id: string) => labelOf(cats, g, id) ?? `⚠ ${id}`
+  return (
+    <div className="flex min-h-6 items-center gap-1 overflow-hidden whitespace-nowrap">
+      {pick?.tone && <span className={cn(chip, 'border-primary bg-primary/10')}>{flag('tone', pick.tone)}</span>}
+      {roles.slice(0, 2).map((id) => (
+        <span key={id} className={cn(chip, 'bg-muted')}>{flag('roles', id)}</span>
+      ))}
+      {roles.length > 2 && <span className="shrink-0 text-xs text-muted-foreground">+{roles.length - 2}</span>}
+      {status !== 'unreviewed' && <span className={cn(chip, 'border-transparent', STATUS_STYLE[status])}>{status}</span>}
+    </div>
+  )
+}
+
 export function Card({
   item,
   status,
@@ -163,47 +181,60 @@ export function Card({
   const base = stageFor(item, stage)
   const shown: Stage = flip ? (base === 'light' ? 'dark' : 'light') : base
 
+  // Delete is a tombstone and needs a reason: reuse the note, else ask.
+  const act = (s: PickStatus) => {
+    if (s === 'deleted' && pick?.status !== 'deleted') {
+      const reason = pick?.note?.trim() || prompt(`Why delete "${item.title}"? (the reason is kept with the tombstone)`)?.trim()
+      if (!reason) return
+      return onPick(item.id, { status: s, note: reason })
+    }
+    onPick(item.id, { status: pick?.status === s ? null : s })
+  }
+  const onKey = (e: React.KeyboardEvent) => {
+    if ((e.target as Element).closest('input, textarea, select, [contenteditable]') || e.metaKey || e.ctrlKey || e.altKey) return
+    const s = ACTION_KEYS[e.key.toLowerCase()]
+    if (s) {
+      e.preventDefault()
+      act(s)
+    }
+  }
+
   return (
-    <article style={{ height: CARD_H }} className="flex flex-col gap-3 overflow-hidden rounded-lg border bg-card p-3 text-card-foreground shadow-[var(--shadow-sm)]">
-      <Preview item={item} stage={shown} className="h-96" />
-      <header className="flex min-h-0 flex-1 flex-col gap-1 overflow-hidden">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <input type="checkbox" checked={selected} onChange={() => onSelect(item.id)} aria-label={`Select ${item.title}`} className="size-4" />
-          <Badge className={cn('border-transparent', STATUS_STYLE[status])}>{status}</Badge>
-          {pick?.status && <span className="text-xs text-muted-foreground">picked</span>}
-          <span className="ml-auto text-xs text-muted-foreground">{item.source}</span>
+    <article
+      tabIndex={0}
+      onKeyDown={onKey}
+      style={{ height: CARD_H }}
+      className="group flex flex-col gap-3 overflow-hidden rounded-lg border bg-card p-3 text-card-foreground shadow-[var(--shadow-sm)] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <div className="relative">
+        <Preview item={item} stage={shown} className="h-96" />
+        <input type="checkbox" checked={selected} onChange={() => onSelect(item.id)} aria-label={`Select ${item.title}`} className="absolute left-2 top-2 z-10 size-4" />
+        {rank && (
+          <span className="absolute right-2 top-2 z-10">
+            <ScoreTag rank={rank} />
+          </span>
+        )}
+        <div className="absolute inset-x-2 bottom-2 z-10 flex flex-wrap justify-center gap-1 rounded-md bg-background/90 p-1 opacity-0 shadow-sm backdrop-blur motion-safe:transition-opacity group-focus-within:opacity-100 group-hover:opacity-100" data-card-actions>
+          {ACTIONS.map(({ status: s, label }) => (
+            <Button key={s} size="xs" variant={pick?.status === s ? 'default' : 'outline'} aria-pressed={pick?.status === s} onClick={() => act(s)} title={`${label} (${label[0]})`}>
+              {label}
+            </Button>
+          ))}
+          <Button size="xs" variant="ghost" aria-pressed={flip} onClick={() => setFlip((f) => !f)} title="Flip this preview's background">
+            Bg: {shown}
+          </Button>
         </div>
-        <h3 className="font-medium leading-tight">
+      </div>
+      <div className="flex min-w-0 items-baseline gap-2">
+        <h3 className="min-w-0 truncate font-medium leading-tight" title={item.title}>
           <a href={itemHref(item)} className="hover:underline">
             {item.title}
           </a>
         </h3>
-        <code className="text-xs text-muted-foreground">{item.key}</code>
-        <CatChips pick={pick} cats={cats} />
-        <Suggestion pick={pick} rank={rank} cats={cats} onApply={(patch) => onPick(item.id, patch)} />
-        <p className="line-clamp-2 text-sm text-muted-foreground">{item.description || 'No description'}</p>
-        {rank && <p title={rank.reason} className="line-clamp-2 text-xs text-muted-foreground">rank: {rank.reason}</p>}
-        <p className="text-xs text-muted-foreground">
-          <span className={cn('mr-1.5 rounded px-1 py-0.5', weight === 'heavy' ? 'bg-warning text-warning-foreground' : 'bg-muted')}>{weight}</span>
-          {depList(item)}
-        </p>
-        {item.note && <p title={item.note} className="line-clamp-2 text-xs italic text-muted-foreground">catalog: {item.note}</p>}
-      </header>
-      <PickControls
-        item={item}
-        pick={pick}
-        onPick={onPick}
-        extra={
-          <span className="ml-auto flex gap-1.5">
-            <Button size="sm" variant="ghost" aria-pressed={flip} onClick={() => setFlip((f) => !f)} title="Flip this preview's background">
-              Bg: {shown}
-            </Button>
-            <Button size="sm" variant="secondary" asChild>
-              <a href={itemHref(item)}>Open</a>
-            </Button>
-          </span>
-        }
-      />
+        {weight !== 'basic' && <span className={cn('size-2 shrink-0 self-center rounded-full', weight === 'heavy' ? 'bg-warning' : 'bg-info')} title={`Adds a package (${weight}): ${depList(item)}`} data-package-dot />}
+        <span className="ml-auto shrink-0 text-xs text-muted-foreground">{item.source}</span>
+      </div>
+      <CardChips pick={pick} status={status} cats={cats} />
     </article>
   )
 }

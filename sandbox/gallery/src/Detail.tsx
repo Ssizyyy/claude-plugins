@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { depList, PickControls, ScoreTag, STATUS_STYLE, type OnPick } from './Card'
-import { CatPalette, Suggestion } from './Cats'
+import { RoleSelect, Suggestion, TonePicker } from './Cats'
 import { stageFor, type PreviewState, type Stage, type StageMode } from './Preview'
 import type { Categories, Item, Pick, Picks, Rank, Status, Weight } from './types'
 import { useVariants, VariantAside, VariantStage } from './VariantPanel'
@@ -68,7 +68,7 @@ function DetailInner({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target
-      if ((t instanceof Element && t.closest('input, textarea, select, [contenteditable], [role="dialog"]')) || e.metaKey || e.ctrlKey || e.altKey) return
+      if ((t instanceof Element && t.closest('input, textarea, select, [contenteditable], [role="dialog"], [role="menu"]')) || e.metaKey || e.ctrlKey || e.altKey) return
       if (e.key === 'ArrowLeft') onStep(-1)
       else if (e.key === 'ArrowRight') onStep(1)
       else if (e.key === 'Escape') onBack()
@@ -152,7 +152,7 @@ function DetailInner({
             <div className="rounded border p-2 text-xs">
               <div className="mb-1 flex items-center gap-2">
                 <ScoreTag rank={rank} />
-                <span className="text-muted-foreground">rank hint</span>
+                <span className="text-muted-foreground">score</span>
               </div>
               <p>{rank.reason}</p>
               <p className="mt-1 text-muted-foreground">
@@ -160,10 +160,13 @@ function DetailInner({
               </p>
             </div>
           )}
-          <VariantAside item={item} v={v} stage={stage} picks={picks} cats={cats} onPick={onPick} />
+          <div className="flex flex-col gap-2" data-cat-palette>
+            <TonePicker pick={pick} cats={cats} onChange={(patch) => onPick(item.id, patch)} />
+            <RoleSelect pick={pick} cats={cats} onChange={(patch) => onPick(item.id, patch)} />
+            <Suggestion pick={pick} rank={rank} cats={cats} onApply={(patch) => onPick(item.id, patch)} />
+          </div>
           <PickControls item={item} pick={pick} rank={rank} onPick={onPick} shortcuts onDone={onDone} />
-          <Suggestion pick={pick} rank={rank} cats={cats} onApply={(patch) => onPick(item.id, patch)} />
-          <CatPalette pick={pick} cats={cats} onChange={(patch) => onPick(item.id, patch)} />
+          <VariantAside item={item} v={v} picks={picks} cats={cats} onPick={onPick} />
           <details className="text-xs" open={!!item.fetch.error}>
             <summary className="cursor-pointer text-muted-foreground">Fetch details</summary>
             <pre className="mt-1 overflow-auto whitespace-pre-wrap break-words rounded bg-muted p-2">{JSON.stringify(item.fetch, null, 2)}</pre>

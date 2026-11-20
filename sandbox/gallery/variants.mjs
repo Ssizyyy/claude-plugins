@@ -1,8 +1,8 @@
 // Local variants of gallery items: the dev-server side of the component editor. Plain ESM, used by vite.config.ts.
 //
 // Where things live:
-//   saved variants   <data dir>/variants/<source>/<key>/<name>/{files/, tokens.json, meta.json}   (user data, never in the repo)
-//   working copies   src/work/<source>/<key>/<slot>/{files/, tokens.json}                         (gitignored scratch that Vite serves)
+//   saved variants   <data dir>/variants/<source>/<key>/<name>/{files/, meta.json}   (user data, never in the repo)
+//   working copies   src/work/<source>/<key>/<slot>/{files/}                                      (gitignored scratch that Vite serves)
 // A slot is "_draft" (an unsaved edit of the original) or the name of a saved variant. The original in src/items/ is
 // never written. Vite renders the working copy (root-relative path, so HMR and node_modules resolution just work);
 // "Save" copies the working copy into the data dir. Third-party source therefore never lands anywhere git tracks.
@@ -74,7 +74,6 @@ const writeAtomic = (file, text) => {
   writeFileSync(tmp, text);
   renameSync(tmp, file);
 };
-const readTokens = (dir) => readJson(join(dir, 'tokens.json'), {});
 const stamp = () => new Date().toISOString().replace(/[:.]/g, '-');
 
 // Deleted or replaced variants are moved here, not erased.
@@ -93,12 +92,10 @@ function ensureWork(source, key, slot, fresh = false) {
   if (existsSync(join(w, 'files'))) return w;
   if (slot === DRAFT) {
     copyTree(orig(source, key), join(w, 'files'));
-    writeAtomic(join(w, 'tokens.json'), '{}\n');
   } else {
     const s = saved(source, key, slot);
     if (!existsSync(join(s, 'files'))) throw new Error('no such variant');
     copyTree(join(s, 'files'), join(w, 'files'));
-    writeAtomic(join(w, 'tokens.json'), JSON.stringify(readTokens(s), null, 2) + '\n');
   }
   return w;
 }
@@ -106,10 +103,9 @@ function ensureWork(source, key, slot, fresh = false) {
 const isDirty = (source, key, slot) => {
   const w = work(source, key, slot);
   if (!existsSync(join(w, 'files'))) return false;
-  const tokens = readTokens(w);
-  if (slot === DRAFT) return !sameTree(join(w, 'files'), orig(source, key)) || Object.keys(tokens).length > 0;
+  if (slot === DRAFT) return !sameTree(join(w, 'files'), orig(source, key));
   const s = saved(source, key, slot);
-  return !sameTree(join(w, 'files'), join(s, 'files')) || JSON.stringify(tokens) !== JSON.stringify(readTokens(s));
+  return !sameTree(join(w, 'files'), join(s, 'files'));
 };
 
 function snapshot(source, key, slot) {
@@ -120,7 +116,7 @@ function snapshot(source, key, slot) {
     const editable = EDITABLE.test(path) && statSync(abs).size <= MAX_FILE;
     return { path, editable, content: editable ? readFileSync(abs, 'utf8') : '' };
   });
-  return { slot, dir, files, tokens: original ? {} : readTokens(dirname(dir)), dirty: original ? false : isDirty(source, key, slot) };
+  return { slot, dir, files, dirty: original ? false : isDirty(source, key, slot) };
 }
 
 // ---------- picks keyed by "<item id>#<variant>" ----------
@@ -157,7 +153,7 @@ function list(source, key) {
   const variants = existsSync(d)
     ? readdirSync(d, { withFileTypes: true })
         .filter((e) => e.isDirectory() && existsSync(join(d, e.name, 'files')))
-        .map((e) => ({ name: e.name, meta: readJson(join(d, e.name, 'meta.json'), {}), tokens: readTokens(join(d, e.name)) }))
+        .map((e) => ({ name: e.name, meta: readJson(join(d, e.name, 'meta.json'), {}) }))
         .sort((a, b) => (a.meta.created ?? '').localeCompare(b.meta.created ?? ''))
     : [];
   return { variants, draft: existsSync(join(work(source, key, DRAFT), 'files')), draftDirty: isDirty(source, key, DRAFT), dir: d };
@@ -172,7 +168,6 @@ function save({ source, key, slot, name, note }) {
   const tmp = `${target}.tmp-${process.pid}`;
   rmSync(tmp, { recursive: true, force: true });
   copyTree(join(w, 'files'), join(tmp, 'files'));
-  writeFileSync(join(tmp, 'tokens.json'), JSON.stringify(readTokens(w), null, 2) + '\n');
   const now = new Date().toISOString();
   writeFileSync(join(tmp, 'meta.json'), JSON.stringify({ parent: `${source}/${key}`, created: old?.created ?? now, updated: now, note: note ?? old?.note ?? '', entry: entryOf(source, key) }, null, 2) + '\n');
   trash(target, `${source}-${key}-${n}-replaced`);
@@ -269,18 +264,6 @@ function scanImports(texts) {
   return { deps: [...deps].sort(), shadcn: [...shadcn].sort() };
 }
 
-const cssVars = { background: '--background', foreground: '--foreground', primary: '--primary', accent: '--accent', muted: '--muted', border: '--border', destructive: '--destructive' };
-export function tokenCss(tokens, selector) {
-  const lines = [];
-  for (const [k, v] of Object.entries(cssVars)) if (tokens[k]) lines.push(`  ${v}: ${tokens[k]};`);
-  if (tokens.radius != null) lines.push(`  --radius: ${tokens.radius}rem;`);
-  if (tokens.spacing != null) lines.push(`  --spacing: ${tokens.spacing}rem;`);
-  if (tokens.font) lines.push(`  font-family: ${tokens.font};`);
-  if (tokens.scale != null && tokens.scale !== 1) lines.push(`  zoom: ${tokens.scale};`);
-  if (tokens.background) lines.push('  background: var(--background);', '  color: var(--foreground);');
-  return lines.length ? `${selector} {\n${lines.join('\n')}\n}\n` : '';
-}
-
 const lockCmd = (project, deps) => {
   const has = (f) => existsSync(join(project, f));
   const run = has('pnpm-lock.yaml') ? 'pnpm add' : has('yarn.lock') ? 'yarn add' : has('bun.lock') || has('bun.lockb') ? 'bun add' : 'npm install';
@@ -296,17 +279,14 @@ function exportPlan({ source, key, name, project, dest, itemDeps = [], props = {
   const code = files.filter((f) => /\.(tsx?|jsx?)$/.test(f));
   const { deps: scanned, shadcn } = scanImports(code.map(text));
   const deps = [...new Set([...scanned, ...itemDeps.map((d) => String(d).replace(/@[\^~]?[\d.]+$|@latest$/, '')).filter((d) => !IGNORE_PKG.test(d))])].sort();
-  const tokens = readTokens(v);
   const entry = readJson(join(v, 'meta.json'), {}).entry || entryOf(source, key);
   const folder = `${key}-${n}`.replace(/[^A-Za-z0-9._-]/g, '-');
-  const scope = `variant-${folder}`.toLowerCase();
-  const css = tokenCss(tokens, `.${scope}`);
 
   let comps = null;
   let alias = '';
   let base = '';
   let basis = '';
-  const plan = { name: n, folder, entry, deps, shadcn, tokensCss: css, scope, project: '', dest: '', basis: '', files: [], install: '', usage: '' };
+  const plan = { name: n, folder, entry, deps, shadcn, project: '', dest: '', basis: '', files: [], install: '', usage: '' };
   if (project) {
     const proj = resolve(project);
     if (!existsSync(proj) || !statSync(proj).isDirectory()) throw new Error('project folder does not exist');
@@ -325,7 +305,7 @@ function exportPlan({ source, key, name, project, dest, itemDeps = [], props = {
     plan.install = lockCmd(proj, deps);
     if (base) {
       plan.dest = relative(proj, base) || '.';
-      const all = [...files.map((f) => ({ rel: f, incoming: readFileSync(join(v, 'files', f)) })), ...(css ? [{ rel: 'tokens.css', incoming: Buffer.from(css) }] : [])];
+      const all = [...files.map((f) => ({ rel: f, incoming: readFileSync(join(v, 'files', f)) }))];
       plan.files = all.map(({ rel, incoming }) => {
         const abs = join(base, rel);
         const exists = existsSync(abs);
@@ -343,7 +323,7 @@ function exportPlan({ source, key, name, project, dest, itemDeps = [], props = {
   const spec = (alias ? `${alias}/${folder}/` : `@/components/${folder}/`) + entry.replace(/\.(tsx|jsx|ts|js)$/, '');
   const attrs = Object.entries(props).filter(([k]) => !k.startsWith('_')).map(([k, val]) => (typeof val === 'string' ? ` ${k}=${JSON.stringify(val)}` : ` ${k}={${JSON.stringify(val)}}`)).join('');
   const tag = `<${comp}${attrs} />`;
-  plan.usage = `${isDefault ? `import ${comp} from '${spec}'` : `import { ${comp} } from '${spec}'`}\n${css ? `import '${spec.replace(/[^/]+$/, 'tokens.css')}'\n` : ''}\nexport function Demo() {\n  return ${css ? `<div className="${scope}">${tag}</div>` : tag}\n}\n`;
+  plan.usage = `${isDefault ? `import ${comp} from '${spec}'` : `import { ${comp} } from '${spec}'`}\n\nexport function Demo() {\n  return ${tag}\n}\n`;
   plan.title = title;
   plan.source = `${source}/${key}`;
   plan.variantPath = v;
@@ -357,7 +337,6 @@ function installPrompt(p, entry) {
     '',
     `Variant folder: ${p.variantPath}`,
     `- Source files are in ${join(p.variantPath, 'files')} (entry: ${entry || 'see folder'}).`,
-    p.tokensCss ? `- Token overrides to apply are in ${join(p.variantPath, 'tokens.json')}. As CSS:\n${p.tokensCss.trimEnd().replace(/^/gm, '    ')}` : '- No token overrides.',
     '',
     'Do this:',
     "1. Read components.json (shadcn aliases) and the project's conventions, then copy the files into the matching components folder. Rewrite imports to the project's aliases if they differ.",
@@ -386,8 +365,7 @@ function exportWrite(body) {
     else if (f.exists && !allow.has(f.rel)) out.kept.push(f.rel); // never overwritten without an explicit yes for that file
     else {
       mkdirSync(dirname(abs), { recursive: true });
-      if (f.rel === 'tokens.css') writeFileSync(abs, plan.tokensCss);
-      else copyFileSync(join(v, 'files', f.rel), abs);
+      copyFileSync(join(v, 'files', f.rel), abs);
       out.written.push(f.rel);
     }
   }
@@ -414,11 +392,6 @@ export function handle(req, res, body) {
       const abs = inside(w, b.path);
       if (!existsSync(abs) || !EDITABLE.test(b.path) || typeof b.content !== 'string') throw new Error('not an editable file');
       writeFileSync(abs, b.content);
-      return { dirty: isDirty(b.source, b.key, slotOf(b.slot)) };
-    }
-    case 'tokens': {
-      const w = ensureWork(b.source, b.key, slotOf(b.slot));
-      writeAtomic(join(w, 'tokens.json'), JSON.stringify(b.tokens ?? {}, null, 2) + '\n');
       return { dirty: isDirty(b.source, b.key, slotOf(b.slot)) };
     }
     case 'discard': // drop unsaved changes: draft is deleted, a variant goes back to its saved state

@@ -27,21 +27,21 @@ export const readJson = (p, fallback) => {
 };
 
 // Write through a temp file + rename so a crash never leaves half a file; first copy the old file into backups/.
-export function writeData(file, value) {
+export function writeData(file, value, force = false) {
   mkdirSync(dirname(file), { recursive: true });
-  if (existsSync(file)) backup(file);
+  if (existsSync(file)) backup(file, force);
   const tmp = `${file}.${process.pid}.tmp`;
   writeFileSync(tmp, JSON.stringify(value, null, 2) + '\n');
   renameSync(tmp, file);
 }
 
-function backup(file) {
+function backup(file, force = false) {
   const dir = join(dirname(file), 'backups');
   const stem = file.replace(/^.*[\\/]/, '').replace(/\.json$/, '');
   mkdirSync(dir, { recursive: true });
   const mine = readdirSync(dir).filter((f) => f.startsWith(`${stem}-`) && f.endsWith('.json')).sort();
   const last = mine.at(-1)?.slice(stem.length + 1, -5).replace(/(T\d\d)-(\d\d)-(\d\d)/, '$1:$2:$3');
-  if (last && Date.now() - Date.parse(last) < BACKUP_GAP_MS) return;
+  if (!force && last && Date.now() - Date.parse(last) < BACKUP_GAP_MS) return;
   copyFileSync(file, join(dir, `${stem}-${new Date().toISOString().replace(/:/g, '-').replace(/\.\d+Z$/, 'Z')}.json`));
   for (const old of mine.slice(0, Math.max(0, mine.length + 1 - KEEP))) rmSync(join(dir, old));
 }
@@ -99,3 +99,38 @@ export function migrate() {
 }
 
 export const lastMigration = () => readJson(join(dataDir, 'migrated.json'), {}).last ?? {};
+
+// ---------- category migration ----------
+// The Role list was merged from 10 values to 6 and the Style group was dropped. Old picks and ranking suggestions are
+// mapped on read; nothing else changes. Role ids the user added themselves are kept as they are.
+export const ROLE_MAP = {
+  navigation: 'navigation',
+  forms: 'forms',
+  data: 'data-feedback',
+  feedback: 'data-feedback',
+  layout: 'layout-overlays',
+  overlays: 'layout-overlays',
+  'text-effects': 'effects',
+  backgrounds: 'effects',
+  loaders: 'effects',
+  sections: 'sections',
+};
+const mapRoles = (roles) => [...new Set(roles.map((r) => ROLE_MAP[r] ?? r))];
+
+// Returns the picks file in the current shape and rewrites it (after a forced backup) when it had the old one.
+export function readPicks() {
+  const file = readJson(picksFile, { picks: {} });
+  let changed = false;
+  for (const [id, p] of Object.entries(file.picks ?? {})) {
+    if (!('styles' in p) && !(p.roles ?? []).some((r) => ROLE_MAP[r] && ROLE_MAP[r] !== r)) continue;
+    changed = true;
+    const { styles, ...rest } = p;
+    if (rest.roles) rest.roles = mapRoles(rest.roles);
+    if (rest.status || rest.note || rest.tone || rest.roles?.length || rest.preferredVariant) file.picks[id] = rest;
+    else delete file.picks[id]; // it held styles only
+  }
+  if (changed) writeData(picksFile, file, true);
+  return file;
+}
+
+export const readRanking = () => readJson(rankingFile, []).map((r) => (r.suggested?.roles ? { ...r, suggested: { ...r.suggested, roles: mapRoles(r.suggested.roles) } } : r));
