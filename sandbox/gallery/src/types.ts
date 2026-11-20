@@ -1,4 +1,5 @@
-export type Status = 'used' | 'adopted' | 'candidate' | 'unreviewed' | 'rejected' | 'deleted'
+// 'reported' is derived, never stored: an unreviewed item with an open report counts as having a status
+export type Status = 'used' | 'adopted' | 'candidate' | 'unreviewed' | 'reported' | 'rejected' | 'deleted'
 export type PickStatus = 'adopted' | 'candidate' | 'rejected' | 'deleted'
 
 export interface Item {
@@ -10,7 +11,7 @@ export interface Item {
   family: string
   dependencies: string[]
   install: string
-  status: Exclude<Status, 'deleted'>
+  status: Exclude<Status, 'deleted' | 'reported'>
   surface?: 'app' | 'marketing' | 'both'
   motion?: string
   note?: string

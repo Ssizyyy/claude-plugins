@@ -12,6 +12,7 @@ export const STATUS_STYLE: Record<Status, string> = {
   adopted: 'bg-success text-success-foreground',
   candidate: 'bg-warning text-warning-foreground',
   unreviewed: 'bg-muted text-muted-foreground',
+  reported: 'bg-warning/20 text-foreground',
   rejected: 'bg-destructive/15 text-destructive',
   deleted: 'bg-destructive text-white',
 }
@@ -151,7 +152,7 @@ function CardChips({ pick, status, cats, report }: { pick?: Pick; status: Status
       ))}
       {roles.length > 2 && <span className="shrink-0 text-xs text-muted-foreground">+{roles.length - 2}</span>}
       <ReportedChip api={report} />
-      {status !== 'unreviewed' && <span className={cn(chip, 'border-transparent', STATUS_STYLE[status])}>{status}</span>}
+      {status !== 'unreviewed' && status !== 'reported' && <span className={cn(chip, 'border-transparent', STATUS_STYLE[status])}>{status}</span>}
     </div>
   )
 }

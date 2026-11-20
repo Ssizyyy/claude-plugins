@@ -12,7 +12,7 @@ import { galleryVersion, recentErrors, type Report, type ReportApi } from './rep
 import type { StageMode } from './Preview'
 import { assigned, fetchState, GROUP_IDS, uncategorized, type Categories, type CatPatch, type GroupId, type Item, type Picks, type Ranking, type Status, type Weight } from './types'
 
-const STATUSES: Status[] = ['unreviewed', 'candidate', 'adopted', 'used', 'rejected', 'deleted']
+const STATUSES: Status[] = ['unreviewed', 'reported', 'candidate', 'adopted', 'used', 'rejected', 'deleted']
 const SURFACES = ['app', 'marketing', 'both', 'untagged'] as const
 const WEIGHTS: Weight[] = ['basic', 'extra', 'heavy']
 const FETCHES = ['ok', 'failed', 'not fetched'] as const
@@ -98,7 +98,7 @@ function SideButton({ on, onClick, children }: { on: boolean; onClick: () => voi
   )
 }
 
-const STATUS_ORDER: Record<Status, number> = { unreviewed: 0, candidate: 1, adopted: 2, used: 3, rejected: 4, deleted: 5 }
+const STATUS_ORDER: Record<Status, number> = { unreviewed: 0, reported: 1, candidate: 2, adopted: 3, used: 4, rejected: 5, deleted: 6 }
 
 export default function App() {
   const [items, setItems] = useState<Item[]>([])
@@ -220,7 +220,7 @@ export default function App() {
 
   // a Tone the user set decides the surface (product UI = app, brand = marketing); otherwise the item's own tag
   const surfaceOf = (i: Item) => cats.groups.find((g) => g.id === 'tone')?.values.find((v) => v.id === picks[i.id]?.tone)?.surface ?? i.surface ?? 'untagged'
-  const statusOf = useCallback((i: Item): Status => picks[i.id]?.status ?? i.status, [picks])
+  const statusOf = useCallback((i: Item): Status => picks[i.id]?.status ?? (openReports.has(i.id) ? 'reported' : i.status), [picks, openReports])
   const rows = useMemo(() => items.map((item) => ({ item, weight: weightOf(item) })), [items])
 
   const words = q.toLowerCase().split(/\s+/).filter(Boolean)
@@ -246,8 +246,7 @@ export default function App() {
       searched
         .filter(
           ({ item, weight }) =>
-            statuses.has(statusOf(item)) &&
-            (!onlyReported || openReports.has(item.id)) &&
+            (onlyReported ? openReports.has(item.id) : statuses.has(statusOf(item))) &&
             surfaces.has(surfaceOf(item)) &&
             weights.has(weight) &&
             fetches.has(fetchState(item)) &&
@@ -271,11 +270,11 @@ export default function App() {
     if (ids[0]) location.hash = `#/queue/${ids[0]}`
   }
   const queueRows = useMemo(
-    () => (queueIds ?? []).map((id) => rows.find((r) => r.item.id === id)).filter((r): r is NonNullable<typeof r> => !!r && (!picks[r.item.id]?.status || r.item.id === detailId)),
+    () => (queueIds ?? []).map((id) => rows.find((r) => r.item.id === id)).filter((r): r is NonNullable<typeof r> => !!r && (['unreviewed', 'candidate'].includes(statusOf(r.item)) || r.item.id === detailId)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [queueIds, rows, picks, detailId],
   )
-  const undecided = queueRows.filter(({ item }) => !picks[item.id]?.status).length
+  const undecided = queueRows.filter(({ item }) => statusOf(item) === 'unreviewed').length
 
   const navRows = inQueue ? queueRows : visible
   const detailIdx = navRows.findIndex(({ item }) => item.id === detailId)
